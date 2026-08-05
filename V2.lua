@@ -22,7 +22,6 @@ ScreenGui.ResetOnSpawn = false
 
 -- Variabel RGB & UI Tracking
 local rgbElements = {}
-local isRgbActive = false
 local activeSlider = nil
 
 -- ------------------------------------------
@@ -123,13 +122,12 @@ local function createTab(name)
     local tabBtn = Instance.new("TextButton")
     tabBtn.Parent = TabBar
     tabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    -- Lebar tab otomatis menyesuaikan jumlah tab (4 tab = 0.25)
     tabBtn.Size = UDim2.new(0.25, -2, 1, 0)
     tabBtn.Position = UDim2.new(0.25 * tabCount, 1, 0, 0)
     tabBtn.Font = Enum.Font.SourceSansBold
     tabBtn.Text = name
     tabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    tabBtn.TextSize = 11
+    tabBtn.TextSize = 10
     tabBtn.ZIndex = 3
 
     local scroll = Instance.new("ScrollingFrame")
@@ -444,7 +442,7 @@ addToggle(tab1, "Auto Teleport Terdekat", false, function(state)
 end)
 
 
--- TAB 2: FITUR 🛠️ (+5 Fitur Baru)
+-- TAB 2: FITUR 🛠️
 local tab2 = createTab("Fitur 🛠️")
 
 local espActive = false
@@ -520,7 +518,6 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- [FITUR BARU 1] Godmode / Anti Mati (Mendaur ulang HP Humanoid)
 local godmodeActive = false
 addToggle(tab2, "Godmode / Anti Mati 🛡️", false, function(state)
     godmodeActive = state
@@ -528,16 +525,13 @@ addToggle(tab2, "Godmode / Anti Mati 🛡️", false, function(state)
         while godmodeActive do
             if LocalPlayer.Character then
                 local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.Health = hum.MaxHealth
-                end
+                if hum then hum.Health = hum.MaxHealth end
             end
             task.wait(0.2)
         end
     end)
 end)
 
--- [FITUR BARU 2] Infinite Jump (Loncat Tanpa Batas di Udara)
 local infJumpActive = false
 addToggle(tab2, "Infinite Jump 🦘", false, function(state)
     infJumpActive = state
@@ -546,33 +540,24 @@ end)
 UserInputService.JumpRequest:Connect(function()
     if infJumpActive and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum:ChangeState(Enum.HumanoidState.Jumping)
-        end
+        if hum then hum:ChangeState(Enum.HumanoidState.Jumping) end
     end
 end)
 
--- [FITUR BARU 3] Ubah WalkSpeed Karakter (Slider)
 addSlider(tab2, "Atur WalkSpeed ⚡", 16, 200, 16, function(val)
     if LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.WalkSpeed = val
-        end
+        if hum then hum.WalkSpeed = val end
     end
 end)
 
--- [FITUR BARU 4] Ubah JumpPower Karakter (Slider)
 addSlider(tab2, "Atur JumpPower 🤾", 50, 300, 50, function(val)
     if LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.JumpPower = val
-        end
+        if hum then hum.JumpPower = val end
     end
 end)
 
--- [FITUR BARU 5] Invisible Karakter (Transparan Total)
 local invisActive = false
 addToggle(tab2, "Invisible (Menghilang) 👻", false, function(state)
     invisActive = state
@@ -586,7 +571,7 @@ addToggle(tab2, "Invisible (Menghilang) 👻", false, function(state)
 end)
 
 
--- TAB 3: TROLL 🎭 (+5 Fitur Troll Baru)
+-- TAB 3: TROLL 🎭
 local tab3 = createTab("Troll 🎭")
 local selectedTrollTarget = ""
 
@@ -822,7 +807,6 @@ addToggle(tab3, "Glitch Teleport Aura Target 💫", false, function(state)
     end)
 end)
 
--- [FITUR TROLL BARU 11] Void Trap / Tarik Semua Player ke Bawah Map
 addButton(tab3, "Void Trap Semua Player 🕳️💥", function()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -831,7 +815,6 @@ addButton(tab3, "Void Trap Semua Player 🕳️💥", function()
     end
 end)
 
--- [FITUR TROLL BARU 12] Blind Target / Teleport Kotak Hitam di Depan Muka Target
 local blindActive = false
 addToggle(tab3, "Blind Target (Butakan Layar) 🕶️", false, function(state)
     blindActive = state
@@ -841,7 +824,6 @@ addToggle(tab3, "Blind Target (Butakan Layar) 🕶️", false, function(state)
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character and target.Character:FindFirstChild("Head") then
                     local head = target.Character.Head
-                    -- Mengunci posisi part tepat di depan kepala target
                     local p = workspace:FindFirstChild("BlindPart_" .. target.Name)
                     if not p then
                         p = Instance.new("Part")
@@ -857,7 +839,6 @@ addToggle(tab3, "Blind Target (Butakan Layar) 🕶️", false, function(state)
             end
             task.wait(0.1)
         end
-        -- Hapus part saat dimatikan
         if selectedTrollTarget ~= "" then
             local p = workspace:FindFirstChild("BlindPart_" .. selectedTrollTarget)
             if p then p:Destroy() end
@@ -865,7 +846,6 @@ addToggle(tab3, "Blind Target (Butakan Layar) 🕶️", false, function(state)
     end)
 end)
 
--- [FITUR TROLL BARU 13] Force Ragdoll / Paksa Jatuh Rebahan
 local ragdollActive = false
 addToggle(tab3, "Force Ragdoll Target 🛌", false, function(state)
     ragdollActive = state
@@ -875,9 +855,7 @@ addToggle(tab3, "Force Ragdoll Target 🛌", false, function(state)
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character then
                     local hum = target.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.PlatformStand = true
-                    end
+                    if hum then hum.PlatformStand = true end
                 end
             end
             task.wait(0.2)
@@ -892,7 +870,6 @@ addToggle(tab3, "Force Ragdoll Target 🛌", false, function(state)
     end)
 end)
 
--- [FITUR TROLL BARU 14] Jumpscare Audio/Part Spam ke Target
 local spamPartActive = false
 addToggle(tab3, "Spam Part Block di Muka Target 📦", false, function(state)
     spamPartActive = state
@@ -906,7 +883,7 @@ addToggle(tab3, "Spam Part Block di Muka Target 📦", false, function(state)
                     part.Position = target.Character.Head.Position + Vector3.new(math.random(-3,3), math.random(0,3), math.random(-3,3))
                     part.BrickColor = BrickColor.random()
                     part.Parent = workspace
-                    game:GetService("Debris"):AddItem(part, 1.5) -- Hapus otomatis setelah 1.5 detik
+                    game:GetService("Debris"):AddItem(part, 1.5)
                 end
             end
             task.wait(0.2)
@@ -914,7 +891,6 @@ addToggle(tab3, "Spam Part Block di Muka Target 📦", false, function(state)
     end)
 end)
 
--- [FITUR TROLL BARU 15] Portal Loop Teleport (Bawa Target Terus Menerus)
 local portalLoopActive = false
 addToggle(tab3, "Portal Loop Bounce Target 🔀", false, function(state)
     portalLoopActive = state
@@ -933,10 +909,9 @@ addToggle(tab3, "Portal Loop Bounce Target 🔀", false, function(state)
 end)
 
 
--- TAB 4: FUN & VISUAL ✨ (Tambahan 5 Fitur Visual Tambahan)
+-- TAB 4: FUN & VISUAL ✨
 local tab4 = createTab("Fun & Visual ✨")
 
--- [FITUR VISUAL 1] FullBright (Biar Malam/Gelap Jadi Terang Benderang)
 local fullbrightActive = false
 addToggle(tab4, "FullBright (Anti Gelap) ☀️", false, function(state)
     fullbrightActive = state
@@ -951,12 +926,10 @@ addToggle(tab4, "FullBright (Anti Gelap) ☀️", false, function(state)
     end)
 end)
 
--- [FITUR VISUAL 2] Ubah FOV Kamera (Slider)
 addSlider(tab4, "Ubah FOV Kamera 🔭", 70, 120, 70, function(val)
     workspace.CurrentCamera.FieldOfView = val
 end)
 
--- [FITUR VISUAL 3] Rainbow Character Color (Ganti Warna Karakter RGB)
 local rainbowCharActive = false
 addToggle(tab4, "Rainbow Character Body 🌈", false, function(state)
     rainbowCharActive = state
@@ -977,7 +950,6 @@ addToggle(tab4, "Rainbow Character Body 🌈", false, function(state)
     end)
 end)
 
--- [FITUR VISUAL 4] Freecam / Detached Camera (Melihat sekeliling bebas)
 local freecamActive = false
 addToggle(tab4, "Freecam Mode 🎥", false, function(state)
     freecamActive = state
@@ -992,7 +964,6 @@ addToggle(tab4, "Freecam Mode 🎥", false, function(state)
     end
 end)
 
--- [FITUR VISUAL 5] Spin Karakter Sendiri Terus Menerus
 local selfSpinActive = false
 addToggle(tab4, "Spin Karakter Sendiri 🌪️", false, function(state)
     selfSpinActive = state
