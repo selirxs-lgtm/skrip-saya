@@ -156,11 +156,11 @@ local function CreateButton(name, callback)
         if state then
             btn.Text = name .. " [ ON ]"
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 110) -- Hijau Neon Terang
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 110)
         else
             btn.Text = name .. " [ OFF ]"
             btn.TextColor3 = Color3.fromRGB(200, 200, 220)
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 52) -- Gelap Elegan
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 52)
         end
         callback(state)
     end)
