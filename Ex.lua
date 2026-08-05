@@ -1,20 +1,14 @@
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 
-local espEnabled = false
-local aimbotEnabled = false
 local godModeEnabled = false
 local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local autoTeleportEnabled = false
 local autoKillEnabled = false
-local fovRadius = 120
-local aiming = false
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "RafaelXiter_Gui"
@@ -22,9 +16,10 @@ ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild(
 ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 260, 0, 380)
+MainFrame.Size = UDim2.new(0, 260, 0, 360)
 MainFrame.Position = UDim2.new(0.5, -130, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
@@ -34,7 +29,8 @@ MainCorner.CornerRadius = UDim.new(0, 10)
 
 local Header = Instance.new("Frame", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+Header.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+Header.BorderSizePixel = 0
 
 local HeaderCorner = Instance.new("UICorner", Header)
 HeaderCorner.CornerRadius = UDim.new(0, 10)
@@ -61,13 +57,11 @@ CloseButton.Font = Enum.Font.GothamBold
 local CloseCorner = Instance.new("UICorner", CloseButton)
 CloseCorner.CornerRadius = UDim.new(0, 6)
 
--- Ubah pakai List biasa biar gak ketutup ScrollingFrame yang bug
-local Container = Instance.new("ScrollingFrame", MainFrame)
-Container.Size = UDim2.new(1, -12, 1, -50)
-Container.Position = UDim2.new(0, 6, 0, 45)
+-- Pakai Frame biasa biar aman dari bug area hitam executor mobile
+local Container = Instance.new("Frame", MainFrame)
+Container.Size = UDim2.new(1, -16, 1, -55)
+Container.Position = UDim2.new(0, 8, 0, 48)
 Container.BackgroundTransparency = 1
-Container.CanvasSize = UDim2.new(0, 0, 0, 480)
-Container.ScrollBarThickness = 4
 
 local UIList = Instance.new("UIListLayout", Container)
 UIList.SortOrder = Enum.SortOrder.LayoutIndex
@@ -75,8 +69,8 @@ UIList.Padding = UDim.new(0, 6)
 
 local function makeBtn(order, text)
     local b = Instance.new("TextButton", Container)
-    b.Size = UDim2.new(1, -4, 0, 36)
-    b.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+    b.Size = UDim2.new(1, 0, 0, 36)
+    b.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     b.Text = text .. " : OFF"
     b.TextColor3 = Color3.fromRGB(220, 220, 220)
     b.TextSize = 11
@@ -88,14 +82,12 @@ local function makeBtn(order, text)
     return b
 end
 
-local BtnESP = makeBtn(1, "ESP")
-local BtnAim = makeBtn(2, "AIMBOT")
-local BtnGod = makeBtn(3, "UNLIMITED HEALTH")
-local BtnTp = makeBtn(4, "AUTO TELEPORT")
-local BtnKill = makeBtn(5, "AUTO KILL")
-local BtnNoclip = makeBtn(6, "NOCLIP")
-local BtnSpeed = makeBtn(7, "SUPER SPEED")
-local BtnJump = makeBtn(8, "SUPER JUMP")
+local BtnGod = makeBtn(1, "UNLIMITED HEALTH")
+local BtnTp = makeBtn(2, "AUTO TELEPORT")
+local BtnKill = makeBtn(3, "AUTO KILL")
+local BtnNoclip = makeBtn(4, "NOCLIP")
+local BtnSpeed = makeBtn(5, "SUPER SPEED")
+local BtnJump = makeBtn(6, "SUPER JUMP")
 
 local OpenButton = Instance.new("TextButton", ScreenGui)
 OpenButton.Size = UDim2.new(0, 110, 0, 36)
@@ -129,14 +121,13 @@ local function toggle(btn, name, callback)
             callback(true)
         else
             btn.Text = name .. " : OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
             btn.TextColor3 = Color3.fromRGB(220, 220, 220)
             callback(false)
         end
     end)
 end
 
-toggle(BtnESP, "ESP", function(v) espEnabled = v end)
 toggle(BtnGod, "UNLIMITED HEALTH", function(v) godModeEnabled = v end)
 toggle(BtnTp, "AUTO TELEPORT", function(v) autoTeleportEnabled = v end)
 toggle(BtnKill, "AUTO KILL", function(v) autoKillEnabled = v end)
