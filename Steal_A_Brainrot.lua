@@ -1,5 +1,5 @@
 -- ========================================================
--- CUSTOM SCRIPT: Steal a Brainrot [Fixed Toggle UI & God Mode]
+-- CUSTOM SCRIPT: Steal a Brainrot [Ultimate Fixed & Working]
 -- ========================================================
 
 pcall(function()
@@ -25,10 +25,9 @@ local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- Notifikasi
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Brainrot God Hub",
-    Text = "Script Aktif! Tekan tombol 'X' untuk minimize menu.",
+    Title = "Brainrot Hub [Fixed]",
+    Text = "Script diperbaiki total! Anti-mati & Anti-mental.",
     Duration = 3
 })
 
@@ -74,12 +73,11 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0.05, 0, 0, 0)
 Title.Size = UDim2.new(0.7, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "Steal a Brainrot [God Mode]"
+Title.Text = "Steal a Brainrot [Fixed Pro]"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol Close (Sekarang berfungsi sebagai Minimize/Hide & Show, gak kehapus total)
 CloseButton.Name = "CloseButton"
 CloseButton.Parent = TopBar
 CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
@@ -94,7 +92,6 @@ local UICornerClose = Instance.new("UICorner")
 UICornerClose.CornerRadius = UDim.new(0, 6)
 UICornerClose.Parent = CloseButton
 
--- Sistem Minimize UI tanpa merusak script di dalamnya
 local isMinimized = false
 CloseButton.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
@@ -153,17 +150,18 @@ local function CreateButton(name, callback)
 end
 
 -- ========================================================
--- FITUR SAKTI
+-- FITUR DIPERBAIKI TOTAL (AMAN & WORK)
 -- ========================================================
 
--- 1. Wallhack / Noclip
-CreateButton("Wallhack / Noclip (Tembus Markas)", function(enabled)
+-- 1. Wallhack / Noclip Aman (Tanpa Mental Keluar Map)
+CreateButton("Wallhack / Noclip (Aman)", function(enabled)
     if enabled then
         _G.NoclipConn = RunService.Stepped:Connect(function()
             pcall(function()
-                if LocalPlayer.Character then
-                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
+                local char = LocalPlayer.Character
+                if char then
+                    for _, part in pairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                             part.CanCollide = false
                         end
                     end
@@ -178,8 +176,8 @@ CreateButton("Wallhack / Noclip (Tembus Markas)", function(enabled)
     end
 end)
 
--- 2. Auto Steal / Teleport Item
-CreateButton("Auto Steal / Teleport Item", function(enabled)
+-- 2. Auto Steal / Tarik Item Berbasis Jarak (Magnitude)
+CreateButton("Auto Steal / Tarik Item Terdekat", function(enabled)
     if enabled then
         _G.StealLoop = task.spawn(function()
             while true do
@@ -188,18 +186,19 @@ CreateButton("Auto Steal / Teleport Item", function(enabled)
                     if char and char:FindFirstChild("HumanoidRootPart") then
                         local hrp = char.HumanoidRootPart
                         for _, obj in pairs(Workspace:GetDescendants()) do
-                            if obj:IsA("Model") and (obj.Name:lower():find("brainrot") or obj.Name:lower():find("anomali") or obj.Name:lower():find("item") or obj:FindFirstChild("PrimaryPart")) then
-                                local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-                                if targetPart then
-                                    firetouchinterest(hrp, targetPart, 0)
-                                    task.wait(0.02)
-                                    firetouchinterest(hrp, targetPart, 1)
+                            if obj:IsA("BasePart") and (obj.Name:lower():find("brainrot") or obj.Name:lower():find("anomali") or obj.Name:lower():find("item") or obj:FindFirstChild("TouchInterest")) then
+                                local dist = (hrp.Position - obj.Position).Magnitude
+                                if dist < 35 then -- Jika item berada dalam radius 35 stud, tarik langsung posisinya ke kita
+                                    obj.CFrame = hrp.CFrame
+                                    firetouchinterest(hrp, obj, 0)
+                                    task.wait(0.05)
+                                    firetouchinterest(hrp, obj, 1)
                                 end
                             end
                         end
                     end
                 end)
-                task.wait(0.5)
+                task.wait(0.2)
             end
         end)
     else
@@ -210,16 +209,19 @@ CreateButton("Auto Steal / Teleport Item", function(enabled)
     end
 end)
 
--- 3. Speed Hack (CFrame Speed)
-CreateButton("Speed Hack (CFrame Speed)", function(enabled)
+-- 3. Speed Hack Aman (Anti Mati / Anti Void)
+CreateButton("Speed Hack (Aman)", function(enabled)
     if enabled then
-        _G.SpeedLoop = RunService.RenderStepped:Connect(function(dt)
+        _G.SpeedLoop = RunService.RenderStepped:Connect(function()
             pcall(function()
                 local char = LocalPlayer.Character
                 if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
                     local hum = char.Humanoid
                     if hum.MoveDirection.Magnitude > 0 then
-                        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + (hum.MoveDirection * 0.8)
+                        -- Mengunci sumbu Y agar tidak tembus ke bawah tanah / void
+                        local currentPos = char.HumanoidRootPart.Position
+                        local moveDir = hum.MoveDirection
+                        char.HumanoidRootPart.CFrame = CFrame.new(currentPos + (moveDir * 0.7)) * CFrame.Angles(0, select(2, char.HumanoidRootPart.CFrame:ToOrientation()), 0)
                     end
                 end
             end)
