@@ -8,18 +8,18 @@ local Camera = workspace.CurrentCamera
 -- Configuration
 local espEnabled = false
 local aimbotEnabled = false
-local fovCircleVisible = false -- Status toggle FOV Circle
+local fovCircleVisible = false 
 local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
 local aimbotSmooth = 0.3 
-local fovRadius = 120    -- Ukuran radius lingkaran FOV
+local fovRadius = 120    -- Ukuran default FOV
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenuFOVToggle"
+ScreenGui.Name = "AdvancedMenuBodyLock"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -58,9 +58,9 @@ local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 6)
 TopCorner.Parent = TopDetector
 
--- Menu Frame (Diperbesar sedikit untuk muat tombol FOV)
+-- Menu Frame (Diperbesar untuk menampung tombol ukuran FOV)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 240, 0, 380)
+MainFrame.Size = UDim2.new(0, 240, 0, 420)
 MainFrame.Position = UDim2.new(0.5, -120, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 MainFrame.BorderSizePixel = 0
@@ -76,9 +76,9 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -40, 0, 35)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "ROBLOX MENU V5"
+Title.Text = "ROBLOX MENU V6 (BODY LOCK)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
+Title.TextSize = 15
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
@@ -117,16 +117,17 @@ local function createButton(posY, defaultText)
 end
 
 local ToggleESP = createButton(45, "ESP")
-local ToggleAim = createButton(85, "AIMBOT HEAD")
-local ToggleFOV = createButton(125, "FOV CIRCLE") -- Tombol Toggle Khusus FOV
-local ToggleNoclip = createButton(165, "WALLHACK (NOCLIP)")
-local ToggleSpeed = createButton(205, "SUPER SPEED")
-local ToggleJump = createButton(245, "SUPER JUMP")
+local ToggleAim = createButton(85, "AIMBOT BODY")
+local ToggleFOV = createButton(125, "FOV CIRCLE") 
+local ToggleSizeFOV = createButton(165, "FOV SIZE: 120") -- Tombol Pengubah Ukuran FOV
+local ToggleNoclip = createButton(205, "WALLHACK (NOCLIP)")
+local ToggleSpeed = createButton(245, "SUPER SPEED")
+local ToggleJump = createButton(285, "SUPER JUMP")
 
 -- Info Label
 local InfoText = Instance.new("TextLabel")
 InfoText.Size = UDim2.new(1, 0, 0, 25)
-InfoText.Position = UDim2.new(0, 0, 0, 290)
+InfoText.Position = UDim2.new(0, 0, 0, 330)
 InfoText.BackgroundTransparency = 1
 InfoText.Text = "Hold Right-Click for Aimbot"
 InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -166,33 +167,38 @@ local function removeESP(player)
 end
 
 -----------------------------------------
--- Aimbot Logic with FOV Restriction
+-- Aimbot Logic: Locking to Closest Character Part (Body/Head/Any) within FOV
 -----------------------------------------
-local function getClosestPlayerInFOV()
-    local closestPlayer = nil
+local function getClosestPartInFOV()
+    local closestPart = nil
     local shortestDistance = math.huge
     local mousePos = UserInputService:GetMouseLocation()
 
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            local head = player.Character.Head
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if player ~= LocalPlayer and player.Character then
+            local character = player.Character
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
 
             if humanoid and humanoid.Health > 0 then
-                local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-                if onScreen then
-                    local screenVector = Vector2.new(screenPos.X, screenPos.Y)
-                    local distanceToMouse = (screenVector - mousePos).Magnitude
-                    
-                    if distanceToMouse <= fovRadius and distanceToMouse < shortestDistance then
-                        shortestDistance = distanceToMouse
-                        closestPlayer = player
+                -- Mendeteksi seluruh bagian tubuh (HumanoidRootPart, Torso, Head, Arms, Legs)
+                for _, part in ipairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                        if onScreen then
+                            local screenVector = Vector2.new(screenPos.X, screenPos.Y)
+                            local distanceToMouse = (screenVector - mousePos).Magnitude
+                            
+                            if distanceToMouse <= fovRadius and distanceToMouse < shortestDistance then
+                                shortestDistance = distanceToMouse
+                                closestPart = part
+                            end
+                        end
                     end
                 end
             end
         end
     end
-    return closestPlayer
+    return closestPart
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -306,13 +312,12 @@ RunService.RenderStepped:Connect(function()
         TopDetector.Text = "Players Detected: 0"
     end
 
-    -- 2. Aimbot Execution with FOV Check
+    -- 2. Aimbot Execution (Lock to any body part)
     if aimbotEnabled and aiming then
-        local target = getClosestPlayerInFOV()
-        if target and target.Character and target.Character:FindFirstChild("Head") then
-            local targetHead = target.Character.Head.Position
+        local targetPart = getClosestPartInFOV()
+        if targetPart then
             local currentCFrame = Camera.CFrame
-            local targetCFrame = CFrame.new(currentCFrame.Position, targetHead)
+            local targetCFrame = CFrame.new(currentCFrame.Position, targetPart.Position)
             Camera.CFrame = currentCFrame:Lerp(targetCFrame, aimbotSmooth)
         end
     end
@@ -343,24 +348,47 @@ end)
 -- Button Click Handlers
 local function setupToggle(button, onText, offText, callback)
     button.MouseButton1Click:Connect(function()
-        if button.Text:find("OFF") then
-            button.Text = onText .. ": ON"
-            button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-            callback(true)
+        if button.Text:find("OFF") or button.Text:find(":") and not button.Text:find("ON") then
+            -- Handle standard toggles
+            if not button.Text:find("FOV SIZE") then
+                button.Text = onText .. ": ON"
+                button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+                callback(true)
+            end
         else
-            button.Text = offText .. ": OFF"
-            button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-            callback(false)
+            if not button.Text:find("FOV SIZE") then
+                button.Text = offText .. ": OFF"
+                button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+                callback(false)
+            end
         end
     end)
 end
 
 setupToggle(ToggleESP, "ESP", "ESP", function(state) espEnabled = state if not state then espFolder:ClearAllChildren() end end)
-setupToggle(ToggleAim, "AIMBOT HEAD", "AIMBOT HEAD", function(state) aimbotEnabled = state end)
+setupToggle(ToggleAim, "AIMBOT BODY", "AIMBOT BODY", function(state) aimbotEnabled = state end)
 
 setupToggle(ToggleFOV, "FOV CIRCLE", "FOV CIRCLE", function(state) 
     fovCircleVisible = state 
-    FOVCircle.Visible = state -- Lingkaran FOV menyala/mati sesuai tombol toggle
+    FOVCircle.Visible = state 
+end)
+
+-- Tombol Pengatur Ukuran FOV (Berputar: 120 -> 180 -> 240 -> 300 -> 80)
+ToggleSizeFOV.MouseButton1Click:Connect(function()
+    if fovRadius == 120 then
+        fovRadius = 180
+    elseif fovRadius == 180 then
+        fovRadius = 240
+    elseif fovRadius == 240 then
+        fovRadius = 300
+    elseif fovRadius == 300 then
+        fovRadius = 80
+    else
+        fovRadius = 120
+    end
+    
+    FOVCircle.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
+    ToggleSizeFOV.Text = "FOV SIZE: " .. tostring(fovRadius)
 end)
 
 setupToggle(ToggleNoclip, "WALLHACK (NOCLIP)", "WALLHACK (NOCLIP)", function(state) noclipEnabled = state end)
