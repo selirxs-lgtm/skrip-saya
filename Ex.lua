@@ -12,17 +12,34 @@ local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
+local menuVisible = true
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenu"
+ScreenGui.Name = "AdvancedMenuV3"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
+-- HUD / Player Detector di Atas Layar (Di luar Menu)
+local TopDetector = Instance.new("TextLabel")
+TopDetector.Size = UDim2.new(0, 200, 0, 35)
+TopDetector.Position = UDim2.new(0.5, -100, 0, 10)
+TopDetector.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+TopDetector.BackgroundTransparency = 0.3
+TopDetector.Text = "Players Detected: 0"
+TopDetector.TextColor3 = Color3.fromRGB(0, 255, 150)
+TopDetector.TextSize = 14
+TopDetector.Font = Enum.Font.SourceSansBold
+TopDetector.Parent = ScreenGui
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 6)
+TopCorner.Parent = TopDetector
+
 -- Menu Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 240, 0, 360)
+MainFrame.Size = UDim2.new(0, 240, 0, 340)
 MainFrame.Position = UDim2.new(0.5, -120, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 MainFrame.BorderSizePixel = 0
@@ -35,19 +52,36 @@ UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "ROBLOX MENU V2"
+Title.Text = "ROBLOX MENU V3"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
+-- Close Button (X) di Pojok Kanan Atas Menu
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 3)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 14
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Parent = MainFrame
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseButton
+
 -- Helper Function to Create Toggle Buttons
-local function createButton(name, posY, defaultText)
+local function createButton(posY, defaultText)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 200, 0, 35)
-    btn.Position = UDim2.new(0.5, -100, 0, posY)
+    btn.Size = UDim2.new(0, 210, 0, 35)
+    btn.Position = UDim2.new(0.5, -105, 0, posY)
     btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     btn.Text = defaultText .. ": OFF"
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -61,31 +95,16 @@ local function createButton(name, posY, defaultText)
     return btn
 end
 
-local ToggleESP = createButton("ESP", 45, "ESP")
-local ToggleAim = createButton("Aim", 85, "AIMBOT HEAD")
-local ToggleNoclip = createButton("Noclip", 125, "WALLHACK (NOCLIP)")
-local ToggleSpeed = createButton("Speed", 165, "SUPER SPEED")
-local ToggleJump = createButton("Jump", 205, "SUPER JUMP")
-
--- Player Detector Display
-local DetectorText = Instance.new("TextLabel")
-DetectorText.Size = UDim2.new(0, 200, 0, 35)
-DetectorText.Position = UDim2.new(0.5, -100, 0, 250)
-DetectorText.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-DetectorText.Text = "Players Detected: 0"
-DetectorText.TextColor3 = Color3.fromRGB(0, 255, 150)
-DetectorText.TextSize = 13
-DetectorText.Font = Enum.Font.SourceSansBold
-DetectorText.Parent = MainFrame
-
-local Corner3 = Instance.new("UICorner")
-Corner3.CornerRadius = UDim.new(0, 6)
-Corner3.Parent = DetectorText
+local ToggleESP = createButton(45, "ESP")
+local ToggleAim = createButton(85, "AIMBOT HEAD")
+local ToggleNoclip = createButton(125, "WALLHACK (NOCLIP)")
+local ToggleSpeed = createButton(165, "SUPER SPEED")
+local ToggleJump = createButton(205, "SUPER JUMP")
 
 -- Info Label
 local InfoText = Instance.new("TextLabel")
 InfoText.Size = UDim2.new(1, 0, 0, 25)
-InfoText.Position = UDim2.new(0, 0, 0, 310)
+InfoText.Position = UDim2.new(0, 0, 0, 255)
 InfoText.BackgroundTransparency = 1
 InfoText.Text = "Hold Right-Click for Aimbot"
 InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -93,9 +112,26 @@ InfoText.TextSize = 12
 InfoText.Font = Enum.Font.SourceSansItalic
 InfoText.Parent = MainFrame
 
+-- Tombol Buka/Tutup Menu (Floating Button kecil saat menu ditutup)
+local OpenButton = Instance.new("TextButton")
+OpenButton.Size = UDim2.new(0, 100, 0, 30)
+OpenButton.Position = UDim2.new(0, 10, 0, 10)
+OpenButton.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+OpenButton.Text = "OPEN MENU"
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.TextSize = 12
+OpenButton.Font = Enum.Font.SourceSansBold
+OpenButton.Visible = false
+OpenButton.Parent = ScreenGui
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0, 6)
+OpenCorner.Parent = OpenButton
+
 -----------------------------------------
 -- ESP Storage Setup
 -----------------------------------------
+local ESP_FOLDER_NAME = "ESP_Storage"
 local espFolder = workspace:FindFirstChild(ESP_FOLDER_NAME)
 if espFolder then espFolder:Destroy() end
 espFolder = Instance.new("Folder")
@@ -242,9 +278,9 @@ RunService.RenderStepped:Connect(function()
     end
 
     if espEnabled then
-        DetectorText.Text = "Players Detected: " .. tostring(detectedCount)
+        TopDetector.Text = "Players Detected: " .. tostring(detectedCount)
     else
-        DetectorText.Text = "Players Detected: 0"
+        TopDetector.Text = "Players Detected: 0"
     end
 
     -- 2. Aimbot Execution
@@ -269,18 +305,17 @@ RunService.RenderStepped:Connect(function()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if hum then
         if speedEnabled then
-            hum.WalkSpeed = 100 -- Kecepatan normal biasanya 16
+            hum.WalkSpeed = 100
         end
         if jumpEnabled then
-            hum.JumpPower = 150 -- Lompatan normal biasanya 50
+            hum.JumpPower = 150
         end
     end
 end)
 
 -- Button Click Handlers
-local function setupToggle(button, stateVar, onText, offText, callback)
+local function setupToggle(button, onText, offText, callback)
     button.MouseButton1Click:Connect(function()
-        -- Toggle state manually through reference or closure pattern
         if button.Text:find("OFF") then
             button.Text = onText .. ": ON"
             button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
@@ -293,22 +328,33 @@ local function setupToggle(button, stateVar, onText, offText, callback)
     end)
 end
 
-setupToggle(ToggleESP, espEnabled, "ESP", "ESP", function(state) espEnabled = state if not state then espFolder:ClearAllChildren() end end)
-setupToggle(ToggleAim, aimbotEnabled, "AIMBOT HEAD", "AIMBOT HEAD", function(state) aimbotEnabled = state end)
-setupToggle(ToggleNoclip, noclipEnabled, "WALLHACK (NOCLIP)", "WALLHACK (NOCLIP)", function(state) noclipEnabled = state end)
+setupToggle(ToggleESP, "ESP", "ESP", function(state) espEnabled = state if not state then espFolder:ClearAllChildren() end end)
+setupToggle(ToggleAim, "AIMBOT HEAD", "AIMBOT HEAD", function(state) aimbotEnabled = state end)
+setupToggle(ToggleNoclip, "WALLHACK (NOCLIP)", "WALLHACK (NOCLIP)", function(state) noclipEnabled = state end)
 
-setupToggle(ToggleSpeed, speedEnabled, "SUPER SPEED", "SUPER SPEED", function(state) 
+setupToggle(ToggleSpeed, "SUPER SPEED", "SUPER SPEED", function(state) 
     speedEnabled = state 
     if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
     end
 end)
 
-setupToggle(ToggleJump, jumpEnabled, "SUPER JUMP", "SUPER JUMP", function(state) 
+setupToggle(ToggleJump, "SUPER JUMP", "SUPER JUMP", function(state) 
     jumpEnabled = state 
     if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = 50
     end
+end)
+
+-- Close / Open Menu Logic
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenButton.Visible = true
+end)
+
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenButton.Visible = false
 end)
 
 Players.PlayerRemoving:Connect(removeESP)
