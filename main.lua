@@ -8,12 +8,12 @@ task.spawn(function()
     for _, gui in pairs(coreGui:GetChildren()) do
         if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
             gui.Main.Active = true
-            gui.Main.Draggable = true -- Memungkinkan menu utama digeser
+            gui.Main.Draggable = true
         end
     end
 end)
 
--- 2. Membuat Tombol Bulat Melayang (Toggle UI) 🔘
+-- 2. Membuat Tombol Bulat Melayang (Toggle UI Bebas Bug) 🔘
 local ToggleScreen = Instance.new("ScreenGui")
 local ToggleButton = Instance.new("TextButton")
 local UICorner = Instance.new("UICorner")
@@ -32,20 +32,25 @@ ToggleButton.Text = "🚀"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 25.000
 ToggleButton.Active = true
-ToggleButton.Draggable = true -- Tombol bulat bisa digeser di layar HP 📱
+ToggleButton.Draggable = true 
 
 UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = ToggleButton
 
+-- Perbaikan Tombol Toggle: Mengubah Visible secara langsung 👁️
 ToggleButton.MouseButton1Click:Connect(function()
-    Library:ToggleUI()
+    local coreGui = game:GetService("CoreGui")
+    for _, gui in pairs(coreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
+            gui.Main.Visible = not gui.Main.Visible
+        end
+    end
 end)
 
 -- 3. Tab Teleport Player 📁
 local Tab1 = Window:NewTab("Teleport 📍")
 local Section1 = Tab1:NewSection("Pilih Player / Auto")
 
--- Fungsi Mengambil Nama Pemain 👥
 local function getPlayerNames()
     local playerList = {}
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -58,7 +63,6 @@ end
 
 local selectedPlayer = ""
 
--- Menu Dropdown Pilih Pemain 📜
 local dropdown = Section1:NewDropdown("Pilih Pemain Target", "Pilih nama pemain", getPlayerNames(), function(option)
     selectedPlayer = option
 end)
@@ -76,7 +80,6 @@ Section1:NewButton("Teleport ke Player Pilihan", "Pindah ke pemain yang dipilih"
     end
 end)
 
--- Fitur Auto Teleport Terdekat 📏
 local autoTeleportEnabled = false
 local maxRadius = 100
 
@@ -119,11 +122,10 @@ Section1:NewToggle("Auto Teleport Terdekat", "Teleport otomatis ke yang terdekat
     end)
 end)
 
--- 4. Tab Fitur Utama (ESP, Fly, & Masuk Rumah) 📁
+-- 4. Tab Fitur Utama (ESP, Fly, Bypass) 📁
 local Tab2 = Window:NewTab("Fitur 🛠️")
 local Section2 = Tab2:NewSection("ESP, Fly & Bypass")
 
--- Fitur ESP 👁️
 local espEnabled = false
 Section2:NewToggle("ESP Player", "Melihat posisi player lain", function(state)
     espEnabled = state
@@ -146,7 +148,6 @@ Section2:NewToggle("ESP Player", "Melihat posisi player lain", function(state)
     end
 end)
 
--- Fitur Fly 🕊️
 local flying = false
 local flySpeed = 50
 
@@ -184,7 +185,6 @@ Section2:NewToggle("Fly (Terbang)", "Mengaktifkan mode terbang", function(state)
     end
 end)
 
--- Fitur Bypass Rumah Terkunci (Noclip) 🚪
 local noclipEnabled = false
 Section2:NewToggle("Bypass Kunci/Penghalang Rumah", "Bisa menembus pintu & dinding rumah", function(state)
     noclipEnabled = state
@@ -197,5 +197,76 @@ game:GetService("RunService").Stepped:Connect(function()
                 part.CanCollide = false
             end
         end
+    end
+end)
+
+-- 5. Tab Fitur Troll 🎭 (5 Fitur)
+local Tab3 = Window:NewTab("Troll 🎭")
+local Section3 = Tab3:NewSection("Fitur Troll Lucu")
+
+-- Troll 1: Spin Karakter 🌀
+local spinning = false
+Section3:NewToggle("Spin Karakter 🌀", "Berputar sangat cepat", function(state)
+    spinning = state
+    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if spinning and hrp then
+        local spinVelocity = Instance.new("BodyAngularVelocity")
+        spinVelocity.Name = "SpinVelocity"
+        spinVelocity.MaxTorque = Vector3.new(0, math.huge, 0)
+        spinVelocity.AngularVelocity = Vector3.new(0, 50, 0)
+        spinVelocity.Parent = hrp
+    else
+        if hrp and hrp:FindFirstChild("SpinVelocity") then
+            hrp.SpinVelocity:Destroy()
+        end
+    end
+end)
+
+-- Troll 2: Kepala Raksasa 🗣️
+local bigHead = false
+Section3:NewToggle("Kepala Raksasa 🗣️", "Memperbesar ukuran kepala", function(state)
+    bigHead = state
+    local head = game.Players.LocalPlayer.Character:FindFirstChild("Head")
+    if head then
+        if bigHead then
+            head.Size = Vector3.new(5, 5, 5)
+        else
+            head.Size = Vector3.new(2, 1, 1)
+        end
+    end
+end)
+
+-- Troll 3: Lompatan Super 🐇
+Section3:NewToggle("Lompatan Super 🐇", "Melompat sangat tinggi", function(state)
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        if state then
+            humanoid.JumpPower = 150
+        else
+            humanoid.JumpPower = 50
+        end
+    end
+end)
+
+-- Troll 4: Mode Hantu 👻
+local ghostMode = false
+Section3:NewToggle("Mode Hantu 👻", "Menjadi kasat mata", function(state)
+    ghostMode = state
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = ghostMode and 0.8 or 0
+            end
+        end
+    end
+end)
+
+-- Troll 5: Gravitasi Rendah 🌌
+Section3:NewToggle("Gravitasi Bulan 🌌", "Membuat efek melayang", function(state)
+    if state then
+        workspace.Gravity = 20
+    else
+        workspace.Gravity = 196.2
     end
 end)
