@@ -2,13 +2,16 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("Rafael Xiter 🚀", "Midnight")
 
--- Fitur Jendela Utama Bisa Digeser (Draggable) 🔀
+local mainFrame = nil
+
+-- Mencari Frame Utama untuk Pengaturan UI & Draggable 🔀
 task.spawn(function()
     local coreGui = game:GetService("CoreGui")
     for _, gui in pairs(coreGui:GetChildren()) do
         if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
-            gui.Main.Active = true
-            gui.Main.Draggable = true
+            mainFrame = gui.Main
+            mainFrame.Active = true
+            mainFrame.Draggable = true
         end
     end
 end)
@@ -37,12 +40,17 @@ ToggleButton.Draggable = true
 UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = ToggleButton
 
--- Kontrol Buka/Tutup UI Menggunakan Visible 👁️
+-- Kontrol Buka/Tutup UI Menggunakan Properti Visible 👁️
 ToggleButton.MouseButton1Click:Connect(function()
-    local coreGui = game:GetService("CoreGui")
-    for _, gui in pairs(coreGui:GetChildren()) do
-        if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
-            gui.Main.Visible = not gui.Main.Visible
+    if mainFrame then
+        mainFrame.Visible = not mainFrame.Visible
+    else
+        local coreGui = game:GetService("CoreGui")
+        for _, gui in pairs(coreGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
+                mainFrame = gui.Main
+                mainFrame.Visible = not mainFrame.Visible
+            end
         end
     end
 end)
@@ -201,7 +209,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
--- 5. Tab Fitur Troll Player & Mobil (Dua Mode: Select & Radius) 🎭
+-- 5. Tab Fitur Troll Player & Mobil (Target Spesifik & Radius) 🎭
 local Tab3 = Window:NewTab("Troll 🎭")
 local Section3 = Tab3:NewSection("Pengaturan Target Troll")
 
@@ -215,7 +223,6 @@ Section3:NewButton("Refresh Target", "Update daftar nama", function()
     trollDropdown:Refresh(getPlayerNames())
 end)
 
--- Mode Blink Instan
 Section3:NewButton("Blink Ke Target ⚡", "Teleport instan ke belakang target", function()
     if trollTarget ~= "" then
         local target = game.Players:FindFirstChild(trollTarget)
@@ -226,7 +233,6 @@ Section3:NewButton("Blink Ke Target ⚡", "Teleport instan ke belakang target", 
     end
 end)
 
--- Section Troll Spesifik
 local SectionTarget = Tab3:NewSection("Troll Pemain Terpilih")
 
 local spinSelectedPlayer = false
@@ -266,7 +272,6 @@ SectionTarget:NewToggle("Spin Mobil Player Terpilih 🏎️", "Memutar mobil tar
     end)
 end)
 
--- Section Troll Area / Radius
 local SectionRadius = Tab3:NewSection("Troll Radius Area (Otomatis)")
 
 local spinRadiusValue = 50
@@ -318,6 +323,44 @@ SectionRadius:NewToggle("Auto Spin Mobil dalam Radius 🏎️", "Memutar semua m
                 end
             end
             task.wait(0.05)
+        end
+    end)
+end)
+
+-- 6. Tab Setting UI (Tema Warna & Transparansi) ⚙️
+local Tab4 = Window:NewTab("Setting ⚙️")
+local SectionSetting = Tab4:NewSection("Kustomisasi Layar UI")
+
+-- Transparansi Background 🪟
+SectionSetting:NewSlider("Transparansi UI 🪟", "Atur tingkat transparan layar (0-100%)", 100, 0, function(value)
+    if mainFrame then
+        mainFrame.BackgroundTransparency = value / 100
+    end
+end)
+
+-- Pilihan Warna Tema 🎨
+SectionSetting:NewButton("Tema Hitam 🖤", "Mengubah background ke warna hitam", function()
+    if mainFrame then
+        mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    end
+end)
+
+SectionSetting:NewButton("Tema Putih 🤍", "Mengubah background ke warna putih", function()
+    if mainFrame then
+        mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    end
+end)
+
+local rgbEnabled = false
+SectionSetting:NewToggle("Tema Pelangi RGB 🌈", "Animasi warna pelangi berputar", function(state)
+    rgbEnabled = state
+    task.spawn(function()
+        while rgbEnabled do
+            if mainFrame then
+                local hue = (tick() % 5) / 5
+                mainFrame.BackgroundColor3 = Color3.fromHSV(hue, 0.8, 0.8)
+            end
+            task.wait(0.03)
         end
     end)
 end)
