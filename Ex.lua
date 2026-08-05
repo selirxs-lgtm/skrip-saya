@@ -122,7 +122,7 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 6)
 CloseCorner.Parent = CloseButton
 
--- Scrollable Content Area (Dengan ukuran kanvas yang pas agar semua tombol tampil)
+-- Scrollable Content Area
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Size = UDim2.new(1, -10, 1, -50)
 ScrollingFrame.Position = UDim2.new(0, 5, 0, 45)
