@@ -3,6 +3,12 @@ local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
+-- Hapus GUI lama biar gak numpuk/beranak kayak di SS
+pcall(function()
+    local old = (gethui and gethui():FindFirstChild("RafaelXiter_V2")) or CoreGui:FindFirstChild("RafaelXiter_V2") or LocalPlayer.PlayerGui:FindFirstChild("RafaelXiter_V2")
+    if old then old:Destroy() end
+end)
+
 local godModeEnabled = false
 local noclipEnabled = false
 local speedEnabled = false
@@ -15,15 +21,17 @@ ScreenGui.Name = "RafaelXiter_V2"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Panel Utama Transparan Total Tanpa Frame Hitam Bug
-local MainContainer = Instance.new("ScrollingFrame", ScreenGui)
+-- Pakai Frame biasa dengan warna solid gelap, dijamin gak tembus bug abu-abu executor
+local MainContainer = Instance.new("Frame", ScreenGui)
 MainContainer.Size = UDim2.new(0, 190, 0, 300)
 MainContainer.Position = UDim2.new(0.05, 0, 0.25, 0)
-MainContainer.BackgroundTransparency = 1
+MainContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+MainContainer.BorderSizePixel = 0
 MainContainer.Active = true
 MainContainer.Draggable = true
-MainContainer.CanvasSize = UDim2.new(0, 0, 0, 280)
-MainContainer.ScrollBarThickness = 3
+
+local MainCorner = Instance.new("UICorner", MainContainer)
+MainCorner.CornerRadius = UDim.new(0, 8)
 
 local UIList = Instance.new("UIListLayout", MainContainer)
 UIList.SortOrder = Enum.SortOrder.LayoutIndex
@@ -31,7 +39,7 @@ UIList.Padding = UDim.new(0, 6)
 UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local Title = Instance.new("TextLabel", MainContainer)
-Title.Size = UDim2.new(1, 0, 0, 28)
+Title.Size = UDim2.new(1, 0, 0, 32)
 Title.BackgroundTransparency = 1
 Title.Text = "Rafael xiter"
 Title.TextColor3 = Color3.fromRGB(0, 255, 200)
@@ -42,7 +50,8 @@ Title.LayoutOrder = 0
 local function makeBtn(order, text)
     local b = Instance.new("TextButton", MainContainer)
     b.Size = UDim2.new(0, 175, 0, 34)
-    b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    b.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+    b.BorderSizePixel = 0
     b.Text = text .. " : OFF"
     b.TextColor3 = Color3.fromRGB(220, 220, 220)
     b.TextSize = 10
@@ -51,10 +60,6 @@ local function makeBtn(order, text)
     
     local c = Instance.new("UICorner", b)
     c.CornerRadius = UDim.new(0, 6)
-
-    local s = Instance.new("UIStroke", b)
-    s.Color = Color3.fromRGB(0, 255, 200)
-    s.Thickness = 1
     return b
 end
 
@@ -74,7 +79,7 @@ local function toggle(btn, name, callback)
             callback(true)
         else
             btn.Text = name .. " : OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
             btn.TextColor3 = Color3.fromRGB(220, 220, 220)
             callback(false)
         end
