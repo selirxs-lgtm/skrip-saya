@@ -1,11 +1,12 @@
 -- ==========================================
--- RAFAEL XITER 🚀 - ULTIMATE MOBILE GUI
+-- RAFAEL XITER 🚀 - ULTIMATE MOBILE GUI (V3 FULL)
 -- ==========================================
 
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
 -- Hapus UI lama jika ada
@@ -122,12 +123,13 @@ local function createTab(name)
     local tabBtn = Instance.new("TextButton")
     tabBtn.Parent = TabBar
     tabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    -- Lebar tab otomatis menyesuaikan jumlah tab (4 tab = 0.25)
     tabBtn.Size = UDim2.new(0.25, -2, 1, 0)
     tabBtn.Position = UDim2.new(0.25 * tabCount, 1, 0, 0)
     tabBtn.Font = Enum.Font.SourceSansBold
     tabBtn.Text = name
     tabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    tabBtn.TextSize = 12
+    tabBtn.TextSize = 11
     tabBtn.ZIndex = 3
 
     local scroll = Instance.new("ScrollingFrame")
@@ -441,7 +443,8 @@ addToggle(tab1, "Auto Teleport Terdekat", false, function(state)
     end)
 end)
 
--- TAB 2: FITUR 🛠️
+
+-- TAB 2: FITUR 🛠️ (+5 Fitur Baru)
 local tab2 = createTab("Fitur 🛠️")
 
 local espActive = false
@@ -517,7 +520,73 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- TAB 3: TROLL 🎭
+-- [FITUR BARU 1] Godmode / Anti Mati (Mendaur ulang HP Humanoid)
+local godmodeActive = false
+addToggle(tab2, "Godmode / Anti Mati 🛡️", false, function(state)
+    godmodeActive = state
+    task.spawn(function()
+        while godmodeActive do
+            if LocalPlayer.Character then
+                local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.Health = hum.MaxHealth
+                end
+            end
+            task.wait(0.2)
+        end
+    end)
+end)
+
+-- [FITUR BARU 2] Infinite Jump (Loncat Tanpa Batas di Udara)
+local infJumpActive = false
+addToggle(tab2, "Infinite Jump 🦘", false, function(state)
+    infJumpActive = state
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infJumpActive and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidState.Jumping)
+        end
+    end
+end)
+
+-- [FITUR BARU 3] Ubah WalkSpeed Karakter (Slider)
+addSlider(tab2, "Atur WalkSpeed ⚡", 16, 200, 16, function(val)
+    if LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = val
+        end
+    end
+end)
+
+-- [FITUR BARU 4] Ubah JumpPower Karakter (Slider)
+addSlider(tab2, "Atur JumpPower 🤾", 50, 300, 50, function(val)
+    if LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.JumpPower = val
+        end
+    end
+end)
+
+-- [FITUR BARU 5] Invisible Karakter (Transparan Total)
+local invisActive = false
+addToggle(tab2, "Invisible (Menghilang) 👻", false, function(state)
+    invisActive = state
+    if LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = invisActive and 1 or 0
+            end
+        end
+    end
+end)
+
+
+-- TAB 3: TROLL 🎭 (+5 Fitur Troll Baru)
 local tab3 = createTab("Troll 🎭")
 local selectedTrollTarget = ""
 
@@ -595,11 +664,6 @@ addToggle(tab3, "Auto Spin Radius Player 🌀", false, function(state)
     end)
 end)
 
--- ==========================================
--- TAMBAHAN 10 FITUR TROLL BARU 🎭🔥
--- ==========================================
-
--- 1. Fling Target (Menerbangkan Player)
 local flingTargetActive = false
 addToggle(tab3, "Fling Target (Banned Vibe) 🌪️", false, function(state)
     flingTargetActive = state
@@ -617,7 +681,6 @@ addToggle(tab3, "Fling Target (Banned Vibe) 🌪️", false, function(state)
     end)
 end)
 
--- 2. Jump Scare / Force Jump Target
 local forceJumpActive = false
 addToggle(tab3, "Force Jump Target 🦘", false, function(state)
     forceJumpActive = state
@@ -627,9 +690,7 @@ addToggle(tab3, "Force Jump Target 🦘", false, function(state)
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character then
                     local hum = target.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.Jump = true
-                    end
+                    if hum then hum.Jump = true end
                 end
             end
             task.wait(0.1)
@@ -637,7 +698,6 @@ addToggle(tab3, "Force Jump Target 🦘", false, function(state)
     end)
 end)
 
--- 3. Freeze Target (Kunci Posisi)
 local freezeTargetActive = false
 addToggle(tab3, "Freeze Target Position 🧊", false, function(state)
     freezeTargetActive = state
@@ -646,8 +706,7 @@ addToggle(tab3, "Freeze Target Position 🧊", false, function(state)
             if selectedTrollTarget ~= "" then
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = target.Character.HumanoidRootPart
-                    hrp.Anchored = true
+                    target.Character.HumanoidRootPart.Anchored = true
                 end
             end
             task.wait(0.1)
@@ -661,7 +720,6 @@ addToggle(tab3, "Freeze Target Position 🧊", false, function(state)
     end)
 end)
 
--- 4. Slow Motion Target (Bikin Lambat)
 local slowTargetActive = false
 addToggle(tab3, "Super Slow Target 🐢", false, function(state)
     slowTargetActive = state
@@ -671,10 +729,7 @@ addToggle(tab3, "Super Slow Target 🐢", false, function(state)
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character then
                     local hum = target.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.WalkSpeed = 4
-                        hum.JumpPower = 0
-                    end
+                    if hum then hum.WalkSpeed = 4 end
                 end
             end
             task.wait(0.5)
@@ -683,37 +738,23 @@ addToggle(tab3, "Super Slow Target 🐢", false, function(state)
             local target = Players:FindFirstChild(selectedTrollTarget)
             if target and target.Character then
                 local hum = target.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.WalkSpeed = 16
-                    hum.JumpPower = 50
-                end
+                if hum then hum.WalkSpeed = 16 end
             end
         end
     end)
 end)
 
--- 5. Jatuhkan Item/Tools Target
 addButton(tab3, "Jatuhkan Item/Tools Target 🎒", function()
     if selectedTrollTarget ~= "" then
         local target = Players:FindFirstChild(selectedTrollTarget)
         if target and target.Character then
             for _, tool in pairs(target.Character:GetChildren()) do
-                if tool:IsA("Tool") then
-                    tool.Parent = workspace
-                end
-            end
-            if target:FindFirstChild("Backpack") then
-                for _, tool in pairs(target.Backpack:GetChildren()) do
-                    if tool:IsA("Tool") then
-                        tool.Parent = workspace
-                    end
-                end
+                if tool:IsA("Tool") then tool.Parent = workspace end
             end
         end
     end
 end)
 
--- 6. Shake Camera Target
 local shakeTargetActive = false
 addToggle(tab3, "Shake Camera Target 📳", false, function(state)
     shakeTargetActive = state
@@ -722,8 +763,7 @@ addToggle(tab3, "Shake Camera Target 📳", false, function(state)
             if selectedTrollTarget ~= "" then
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = target.Character.HumanoidRootPart
-                    hrp.CFrame = hrp.CFrame * CFrame.new(math.random(-1, 1), math.random(-1, 1), math.random(-1, 1))
+                    target.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(math.random(-1,1), math.random(-1,1), math.random(-1,1))
                 end
             end
             task.wait(0.05)
@@ -731,7 +771,6 @@ addToggle(tab3, "Shake Camera Target 📳", false, function(state)
     end)
 end)
 
--- 7. Teleport Under Map Target
 addButton(tab3, "Kirim Target ke Bawah Map 🕳️", function()
     if selectedTrollTarget ~= "" then
         local target = Players:FindFirstChild(selectedTrollTarget)
@@ -741,7 +780,6 @@ addButton(tab3, "Kirim Target ke Bawah Map 🕳️", function()
     end
 end)
 
--- 8. Sit Force Target (Paksa Duduk)
 local forceSitActive = false
 addToggle(tab3, "Paksa Duduk Target 🪑", false, function(state)
     forceSitActive = state
@@ -751,9 +789,7 @@ addToggle(tab3, "Paksa Duduk Target 🪑", false, function(state)
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character then
                     local hum = target.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.Sit = true
-                    end
+                    if hum then hum.Sit = true end
                 end
             end
             task.wait(0.2)
@@ -761,7 +797,6 @@ addToggle(tab3, "Paksa Duduk Target 🪑", false, function(state)
     end)
 end)
 
--- 9. Teleport Target ke Langit Tertinggi
 addButton(tab3, "Lempar Target ke Langit ☁️", function()
     if selectedTrollTarget ~= "" then
         local target = Players:FindFirstChild(selectedTrollTarget)
@@ -771,7 +806,6 @@ addButton(tab3, "Lempar Target ke Langit ☁️", function()
     end
 end)
 
--- 10. Glitch Teleport Aura Target
 local glitchAuraActive = false
 addToggle(tab3, "Glitch Teleport Aura Target 💫", false, function(state)
     glitchAuraActive = state
@@ -780,15 +814,198 @@ addToggle(tab3, "Glitch Teleport Aura Target 💫", false, function(state)
             if selectedTrollTarget ~= "" then
                 local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = target.Character.HumanoidRootPart
-                    local randomOffset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
-                    hrp.CFrame = hrp.CFrame + randomOffset
+                    target.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(-10,10), 0, math.random(-10,10))
                 end
             end
             task.wait(0.1)
         end
     end)
 end)
+
+-- [FITUR TROLL BARU 11] Void Trap / Tarik Semua Player ke Bawah Map
+addButton(tab3, "Void Trap Semua Player 🕳️💥", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            p.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame - Vector3.new(0, 300, 0)
+        end
+    end
+end)
+
+-- [FITUR TROLL BARU 12] Blind Target / Teleport Kotak Hitam di Depan Muka Target
+local blindActive = false
+addToggle(tab3, "Blind Target (Butakan Layar) 🕶️", false, function(state)
+    blindActive = state
+    task.spawn(function()
+        while blindActive do
+            if selectedTrollTarget ~= "" then
+                local target = Players:FindFirstChild(selectedTrollTarget)
+                if target and target.Character and target.Character:FindFirstChild("Head") then
+                    local head = target.Character.Head
+                    -- Mengunci posisi part tepat di depan kepala target
+                    local p = workspace:FindFirstChild("BlindPart_" .. target.Name)
+                    if not p then
+                        p = Instance.new("Part")
+                        p.Name = "BlindPart_" .. target.Name
+                        p.Size = Vector3.new(3, 3, 3)
+                        p.Color = Color3.fromRGB(0, 0, 0)
+                        p.Anchored = true
+                        p.CanCollide = false
+                        p.Parent = workspace
+                    end
+                    p.CFrame = head.CFrame + head.CFrame.LookVector * 1.2
+                end
+            end
+            task.wait(0.1)
+        end
+        -- Hapus part saat dimatikan
+        if selectedTrollTarget ~= "" then
+            local p = workspace:FindFirstChild("BlindPart_" .. selectedTrollTarget)
+            if p then p:Destroy() end
+        end
+    end)
+end)
+
+-- [FITUR TROLL BARU 13] Force Ragdoll / Paksa Jatuh Rebahan
+local ragdollActive = false
+addToggle(tab3, "Force Ragdoll Target 🛌", false, function(state)
+    ragdollActive = state
+    task.spawn(function()
+        while ragdollActive do
+            if selectedTrollTarget ~= "" then
+                local target = Players:FindFirstChild(selectedTrollTarget)
+                if target and target.Character then
+                    local hum = target.Character:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum.PlatformStand = true
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+        if selectedTrollTarget ~= "" then
+            local target = Players:FindFirstChild(selectedTrollTarget)
+            if target and target.Character then
+                local hum = target.Character:FindFirstChildOfClass("Humanoid")
+                if hum then hum.PlatformStand = false end
+            end
+        end
+    end)
+end)
+
+-- [FITUR TROLL BARU 14] Jumpscare Audio/Part Spam ke Target
+local spamPartActive = false
+addToggle(tab3, "Spam Part Block di Muka Target 📦", false, function(state)
+    spamPartActive = state
+    task.spawn(function()
+        while spamPartActive do
+            if selectedTrollTarget ~= "" then
+                local target = Players:FindFirstChild(selectedTrollTarget)
+                if target and target.Character and target.Character:FindFirstChild("Head") then
+                    local part = Instance.new("Part")
+                    part.Size = Vector3.new(2, 2, 2)
+                    part.Position = target.Character.Head.Position + Vector3.new(math.random(-3,3), math.random(0,3), math.random(-3,3))
+                    part.BrickColor = BrickColor.random()
+                    part.Parent = workspace
+                    game:GetService("Debris"):AddItem(part, 1.5) -- Hapus otomatis setelah 1.5 detik
+                end
+            end
+            task.wait(0.2)
+        end
+    end)
+end)
+
+-- [FITUR TROLL BARU 15] Portal Loop Teleport (Bawa Target Terus Menerus)
+local portalLoopActive = false
+addToggle(tab3, "Portal Loop Bounce Target 🔀", false, function(state)
+    portalLoopActive = state
+    task.spawn(function()
+        while portalLoopActive do
+            if selectedTrollTarget ~= "" then
+                local target = Players:FindFirstChild(selectedTrollTarget)
+                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = target.Character.HumanoidRootPart
+                    hrp.CFrame = CFrame.new(math.random(-200, 200), 50, math.random(-200, 200))
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end)
+
+
+-- TAB 4: FUN & VISUAL ✨ (Tambahan 5 Fitur Visual Tambahan)
+local tab4 = createTab("Fun & Visual ✨")
+
+-- [FITUR VISUAL 1] FullBright (Biar Malam/Gelap Jadi Terang Benderang)
+local fullbrightActive = false
+addToggle(tab4, "FullBright (Anti Gelap) ☀️", false, function(state)
+    fullbrightActive = state
+    task.spawn(function()
+        while fullbrightActive do
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.GlobalShadows = false
+            task.wait(1)
+        end
+        Lighting.GlobalShadows = true
+    end)
+end)
+
+-- [FITUR VISUAL 2] Ubah FOV Kamera (Slider)
+addSlider(tab4, "Ubah FOV Kamera 🔭", 70, 120, 70, function(val)
+    workspace.CurrentCamera.FieldOfView = val
+end)
+
+-- [FITUR VISUAL 3] Rainbow Character Color (Ganti Warna Karakter RGB)
+local rainbowCharActive = false
+addToggle(tab4, "Rainbow Character Body 🌈", false, function(state)
+    rainbowCharActive = state
+    task.spawn(function()
+        local hue = 0
+        while rainbowCharActive do
+            hue = (hue + 2) % 360
+            local col = Color3.fromHSV(hue/360, 1, 1)
+            if LocalPlayer.Character then
+                for _, part in pairs(LocalPlayer.Character:GetChildren()) do
+                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                        part.Color = col
+                    end
+                end
+            end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+-- [FITUR VISUAL 4] Freecam / Detached Camera (Melihat sekeliling bebas)
+local freecamActive = false
+addToggle(tab4, "Freecam Mode 🎥", false, function(state)
+    freecamActive = state
+    local cam = workspace.CurrentCamera
+    if freecamActive then
+        cam.CameraType = Enum.CameraType.Scriptable
+    else
+        cam.CameraType = Enum.CameraType.Custom
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            cam.CameraSubject = LocalPlayer.Character.Humanoid
+        end
+    end
+end)
+
+-- [FITUR VISUAL 5] Spin Karakter Sendiri Terus Menerus
+local selfSpinActive = false
+addToggle(tab4, "Spin Karakter Sendiri 🌪️", false, function(state)
+    selfSpinActive = state
+    task.spawn(function()
+        while selfSpinActive do
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+            end
+            task.wait(0.03)
+        end
+    end)
+end)
+
 
 -- ==========================================
 -- SISTEM RGB PELANGI OTOMATIS (BONUS) 🌈
