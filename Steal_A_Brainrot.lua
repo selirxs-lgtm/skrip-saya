@@ -1,5 +1,5 @@
 -- ========================================================
--- CUSTOM SCRIPT: Steal a Brainrot [Ultimate Bypass & Noclip Edition]
+-- CUSTOM SCRIPT: Steal a Brainrot [Fixed Toggle UI & God Mode]
 -- ========================================================
 
 pcall(function()
@@ -10,7 +10,7 @@ pcall(function()
         end
     end
     if _G.StealLoop then task.cancel(_G.StealLoop) end
-    if _G.SpeedLoop then task.cancel(_G.SpeedLoop) end
+    if _G.SpeedLoop then _G.SpeedLoop:Disconnect() end
     if _G.NoclipConn then _G.NoclipConn:Disconnect() end
     collectgarbage("collect")
 end)
@@ -28,7 +28,7 @@ local UserInputService = game:GetService("UserInputService")
 -- Notifikasi
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Brainrot God Hub",
-    Text = "Mode Noclip & Steal Aktif!",
+    Text = "Script Aktif! Tekan tombol 'X' untuk minimize menu.",
     Duration = 3
 })
 
@@ -79,25 +79,35 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Tombol Close (Sekarang berfungsi sebagai Minimize/Hide & Show, gak kehapus total)
 CloseButton.Name = "CloseButton"
 CloseButton.Parent = TopBar
 CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
 CloseButton.Position = UDim2.new(1, -35, 0.5, -12)
 CloseButton.Size = UDim2.new(0, 24, 0, 24)
 CloseButton.Font = Enum.Font.GothamBold
-CloseButton.Text = "X"
+CloseButton.Text = "-"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 12
+CloseButton.TextSize = 14
 
 local UICornerClose = Instance.new("UICorner")
 UICornerClose.CornerRadius = UDim.new(0, 6)
 UICornerClose.Parent = CloseButton
 
+-- Sistem Minimize UI tanpa merusak script di dalamnya
+local isMinimized = false
 CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-    if _G.StealLoop then task.cancel(_G.StealLoop) end
-    if _G.SpeedLoop then task.cancel(_G.SpeedLoop) end
-    if _G.NoclipConn then _G.NoclipConn:Disconnect() end
+    isMinimized = not isMinimized
+    ContentContainer.Visible = not isMinimized
+    if isMinimized then
+        MainFrame.Size = UDim2.new(0, 300, 0, 45)
+        CloseButton.Text = "+"
+        CloseButton.BackgroundColor3 = Color3.fromRGB(0, 170, 90)
+    else
+        MainFrame.Size = UDim2.new(0, 300, 0, 380)
+        CloseButton.Text = "-"
+        CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+    end
 end)
 
 ContentContainer.Name = "ContentContainer"
@@ -146,7 +156,7 @@ end
 -- FITUR SAKTI
 -- ========================================================
 
--- 1. FITUR WALLHACK / NOCLIP (Tembus Tembok Markas Orang)
+-- 1. Wallhack / Noclip
 CreateButton("Wallhack / Noclip (Tembus Markas)", function(enabled)
     if enabled then
         _G.NoclipConn = RunService.Stepped:Connect(function()
@@ -168,7 +178,7 @@ CreateButton("Wallhack / Noclip (Tembus Markas)", function(enabled)
     end
 end)
 
--- 2. FITUR TELEPORT / TARIK ANOMALI & BRAINROT (Auto Steal)
+-- 2. Auto Steal / Teleport Item
 CreateButton("Auto Steal / Teleport Item", function(enabled)
     if enabled then
         _G.StealLoop = task.spawn(function()
@@ -177,12 +187,10 @@ CreateButton("Auto Steal / Teleport Item", function(enabled)
                     local char = LocalPlayer.Character
                     if char and char:FindFirstChild("HumanoidRootPart") then
                         local hrp = char.HumanoidRootPart
-                        -- Menyisir seluruh map untuk mencari objek/anomali/brainrot
                         for _, obj in pairs(Workspace:GetDescendants()) do
                             if obj:IsA("Model") and (obj.Name:lower():find("brainrot") or obj.Name:lower():find("anomali") or obj.Name:lower():find("item") or obj:FindFirstChild("PrimaryPart")) then
                                 local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
                                 if targetPart then
-                                    -- Teleportasi posisi objek ke depan kita atau sentuh paksa
                                     firetouchinterest(hrp, targetPart, 0)
                                     task.wait(0.02)
                                     firetouchinterest(hrp, targetPart, 1)
@@ -202,7 +210,7 @@ CreateButton("Auto Steal / Teleport Item", function(enabled)
     end
 end)
 
--- 3. SPEED HACK BYPASS (CFrame Based - Dijamin Jalan)
+-- 3. Speed Hack (CFrame Speed)
 CreateButton("Speed Hack (CFrame Speed)", function(enabled)
     if enabled then
         _G.SpeedLoop = RunService.RenderStepped:Connect(function(dt)
@@ -224,7 +232,7 @@ CreateButton("Speed Hack (CFrame Speed)", function(enabled)
     end
 end)
 
--- 4. INFINITE JUMP
+-- 4. Infinite Jump
 local infJumpConn
 CreateButton("Infinite Jump", function(enabled)
     if enabled then
@@ -240,7 +248,7 @@ CreateButton("Infinite Jump", function(enabled)
     end
 end)
 
--- 5. FULLBRIGHT
+-- 5. Fullbright
 CreateButton("Fullbright (Anti Gelap)", function(enabled)
     pcall(function()
         local Lighting = game:GetService("Lighting")
