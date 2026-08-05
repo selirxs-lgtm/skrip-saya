@@ -1,12 +1,16 @@
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
-pcall(function()
-    local old = (gethui and gethui():FindFirstChild("RafaelXiter_Pure")) or CoreGui:FindFirstChild("RafaelXiter_Pure") or LocalPlayer.PlayerGui:FindFirstChild("RafaelXiter_Pure")
-    if old then old:Destroy() end
-end)
+-- Load Kavo UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+
+-- Buat Window Utama
+local Window = Library.CreateLib("Rafael Xiter 🚀", "DarkTheme")
+
+-- Buat Tab Menu
+local Tab = Window:NewTab("Fitur Utama")
+local Section = Tab:NewSection("Pilih Fitur Cheat")
 
 local godModeEnabled = false
 local noclipEnabled = false
@@ -15,72 +19,32 @@ local jumpEnabled = false
 local autoTeleportEnabled = false
 local autoKillEnabled = false
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RafaelXiter_Pure"
-ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+-- Tombol Toggle Kavo UI
+Section:NewToggle("Unlimited Health", "Membuat darah penuh terus", function(state)
+    godModeEnabled = state
+end)
 
--- Title Text kecil ngambang di pojok kiri atas layar
-local Title = Instance.new("TextLabel", ScreenGui)
-Title.Size = UDim2.new(0, 160, 0, 25)
-Title.Position = UDim2.new(0.03, 0, 0.22, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "⚡ Rafael xiter ⚡"
-Title.TextColor3 = Color3.fromRGB(0, 255, 200)
-Title.TextSize = 13
-Title.Font = Enum.Font.GothamBold
+Section:NewToggle("Auto Teleport", "Teleport otomatis ke target", function(state)
+    autoTeleportEnabled = state
+end)
 
-local function makeFloatingBtn(index, text)
-    local b = Instance.new("TextButton", ScreenGui)
-    b.Size = UDim2.new(0, 160, 0, 32)
-    b.Position = UDim2.new(0.03, 0, 0.22, (index * 36))
-    b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    b.Text = text .. " : OFF"
-    b.TextColor3 = Color3.fromRGB(220, 220, 220)
-    b.TextSize = 10
-    b.Font = Enum.Font.GothamBold
-    b.Active = true
-    b.Draggable = true
+Section:NewToggle("Auto Kill", "Membunuh musuh otomatis", function(state)
+    autoKillEnabled = state
+end)
 
-    local c = Instance.new("UICorner", b)
-    c.CornerRadius = UDim.new(0, 6)
+Section:NewToggle("Noclip", "Menembus tembok dan objek", function(state)
+    noclipEnabled = state
+end)
 
-    local s = Instance.new("UIStroke", b)
-    s.Color = Color3.fromRGB(0, 255, 200)
-    s.Thickness = 1
-    return b
-end
+Section:NewToggle("Super Speed", "Kecepatan lari super kencang", function(state)
+    speedEnabled = state
+end)
 
-local BtnGod = makeFloatingBtn(1, "HEALTH")
-local BtnTp = makeFloatingBtn(2, "TELEPORT")
-local BtnKill = makeFloatingBtn(3, "AUTO KILL")
-local BtnNoclip = makeFloatingBtn(4, "NOCLIP")
-local BtnSpeed = makeFloatingBtn(5, "SPEED")
-local BtnJump = makeFloatingBtn(6, "JUMP")
+Section:NewToggle("Super Jump", "Loncat tinggi banget", function(state)
+    jumpEnabled = state
+end)
 
-local function toggle(btn, name, callback)
-    btn.MouseButton1Click:Connect(function()
-        if btn.Text:find("OFF") then
-            btn.Text = name .. " : ON"
-            btn.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            callback(true)
-        else
-            btn.Text = name .. " : OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-            btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-            callback(false)
-        end
-    end)
-end
-
-toggle(BtnGod, "HEALTH", function(v) godModeEnabled = v end)
-toggle(BtnTp, "TELEPORT", function(v) autoTeleportEnabled = v end)
-toggle(BtnKill, "AUTO KILL", function(v) autoKillEnabled = v end)
-toggle(BtnNoclip, "NOCLIP", function(v) noclipEnabled = v end)
-toggle(BtnSpeed, "SPEED", function(v) speedEnabled = v end)
-toggle(BtnJump, "JUMP", function(v) jumpEnabled = v end)
-
+-- Eksekusi Fitur di Background (RenderStepped)
 RunService.RenderStepped:Connect(function()
     if godModeEnabled and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
