@@ -8,19 +8,22 @@ local Camera = workspace.CurrentCamera
 -- Configuration
 local espEnabled = false
 local aimbotEnabled = false
+local noclipEnabled = false
+local speedEnabled = false
+local jumpEnabled = false
 local aiming = false
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedEspAimbotMenu"
+ScreenGui.Name = "AdvancedMenu"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 -- Menu Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 220, 0, 220)
-MainFrame.Position = UDim2.new(0.5, -110, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 360)
+MainFrame.Position = UDim2.new(0.5, -120, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -34,46 +37,40 @@ UICorner.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
-Title.Text = "ESP & AIMBOT"
+Title.Text = "ROBLOX MENU V2"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
--- Toggle ESP Button
-local ToggleESP = Instance.new("TextButton")
-ToggleESP.Size = UDim2.new(0, 180, 0, 40)
-ToggleESP.Position = UDim2.new(0.5, -90, 0, 40)
-ToggleESP.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-ToggleESP.Text = "ESP: OFF"
-ToggleESP.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleESP.TextSize = 14
-ToggleESP.Font = Enum.Font.SourceSansBold
-ToggleESP.Parent = MainFrame
+-- Helper Function to Create Toggle Buttons
+local function createButton(name, posY, defaultText)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 200, 0, 35)
+    btn.Position = UDim2.new(0.5, -100, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    btn.Text = defaultText .. ": OFF"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Parent = MainFrame
 
-local Corner1 = Instance.new("UICorner")
-Corner1.CornerRadius = UDim.new(0, 6)
-Corner1.Parent = ToggleESP
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+    return btn
+end
 
--- Toggle Aimbot Button
-local ToggleAim = Instance.new("TextButton")
-ToggleAim.Size = UDim2.new(0, 180, 0, 40)
-ToggleAim.Position = UDim2.new(0.5, -90, 0, 90)
-ToggleAim.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-ToggleAim.Text = "AIMBOT HEAD: OFF"
-ToggleAim.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleAim.TextSize = 14
-ToggleAim.Font = Enum.Font.SourceSansBold
-ToggleAim.Parent = MainFrame
-
-local Corner2 = Instance.new("UICorner")
-Corner2.CornerRadius = UDim.new(0, 6)
-Corner2.Parent = ToggleAim
+local ToggleESP = createButton("ESP", 45, "ESP")
+local ToggleAim = createButton("Aim", 85, "AIMBOT HEAD")
+local ToggleNoclip = createButton("Noclip", 125, "WALLHACK (NOCLIP)")
+local ToggleSpeed = createButton("Speed", 165, "SUPER SPEED")
+local ToggleJump = createButton("Jump", 205, "SUPER JUMP")
 
 -- Player Detector Display
 local DetectorText = Instance.new("TextLabel")
-DetectorText.Size = UDim2.new(0, 180, 0, 30)
-DetectorText.Position = UDim2.new(0.5, -90, 0, 170)
+DetectorText.Size = UDim2.new(0, 200, 0, 35)
+DetectorText.Position = UDim2.new(0.5, -100, 0, 250)
 DetectorText.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 DetectorText.Text = "Players Detected: 0"
 DetectorText.TextColor3 = Color3.fromRGB(0, 255, 150)
@@ -84,6 +81,17 @@ DetectorText.Parent = MainFrame
 local Corner3 = Instance.new("UICorner")
 Corner3.CornerRadius = UDim.new(0, 6)
 Corner3.Parent = DetectorText
+
+-- Info Label
+local InfoText = Instance.new("TextLabel")
+InfoText.Size = UDim2.new(1, 0, 0, 25)
+InfoText.Position = UDim2.new(0, 0, 0, 310)
+InfoText.BackgroundTransparency = 1
+InfoText.Text = "Hold Right-Click for Aimbot"
+InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
+InfoText.TextSize = 12
+InfoText.Font = Enum.Font.SourceSansItalic
+InfoText.Parent = MainFrame
 
 -----------------------------------------
 -- ESP Storage Setup
@@ -101,7 +109,7 @@ local function removeESP(player)
 end
 
 -----------------------------------------
--- Aimbot Logic (Auto Aim Head)
+-- Aimbot Logic
 -----------------------------------------
 local function getClosestPlayerToCursor()
     local closestPlayer = nil
@@ -128,7 +136,6 @@ local function getClosestPlayerToCursor()
     return closestPlayer
 end
 
--- Mouse hold listener (Right Click to Aim)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -170,7 +177,7 @@ RunService.RenderStepped:Connect(function()
             tag.Parent = espFolder
         end
 
-        -- Name Tag above head
+        -- Name Tag
         local billboard = tag:FindFirstChild("NameTag")
         if not billboard then
             billboard = Instance.new("BillboardGui")
@@ -193,7 +200,7 @@ RunService.RenderStepped:Connect(function()
         billboard:FindFirstChild("PlayerName").Text = player.Name
         billboard.Parent = tag
 
-        -- Tracer Line attached directly to HEAD
+        -- Tracer Line
         local att0 = tag:FindFirstChild("PlayerAtt")
         local att1 = tag:FindFirstChild("ScreenAtt")
         local beam = tag:FindFirstChild("TracerBeam")
@@ -223,7 +230,6 @@ RunService.RenderStepped:Connect(function()
             beam.Attachment1 = att0
             beam.Parent = tag
             
-            -- Position at top of the head
             local headTopPos = head.Position + Vector3.new(0, 0.8, 0)
             local screenOrigin = Camera:ViewportPointToRay(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
             local groundPos = screenOrigin.Origin + (screenOrigin.Direction * 2)
@@ -235,7 +241,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- Update Detector Counter
     if espEnabled then
         DetectorText.Text = "Players Detected: " .. tostring(detectedCount)
     else
@@ -249,29 +254,60 @@ RunService.RenderStepped:Connect(function()
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
         end
     end
-end)
 
--- Button Listeners
-ToggleESP.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    if espEnabled then
-        ToggleESP.Text = "ESP: ON"
-        ToggleESP.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-    else
-        ToggleESP.Text = "ESP: OFF"
-        ToggleESP.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        espFolder:ClearAllChildren()
+    -- 3. Noclip (Wall Hack) Execution
+    if noclipEnabled and LocalPlayer.Character then
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+
+    -- 4. Super Speed & Super Jump Execution
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        if speedEnabled then
+            hum.WalkSpeed = 100 -- Kecepatan normal biasanya 16
+        end
+        if jumpEnabled then
+            hum.JumpPower = 150 -- Lompatan normal biasanya 50
+        end
     end
 end)
 
-ToggleAim.MouseButton1Click:Connect(function()
-    aimbotEnabled = not aimbotEnabled
-    if aimbotEnabled then
-        ToggleAim.Text = "AIMBOT HEAD: ON"
-        ToggleAim.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-    else
-        ToggleAim.Text = "AIMBOT HEAD: OFF"
-        ToggleAim.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+-- Button Click Handlers
+local function setupToggle(button, stateVar, onText, offText, callback)
+    button.MouseButton1Click:Connect(function()
+        -- Toggle state manually through reference or closure pattern
+        if button.Text:find("OFF") then
+            button.Text = onText .. ": ON"
+            button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+            callback(true)
+        else
+            button.Text = offText .. ": OFF"
+            button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            callback(false)
+        end
+    end)
+end
+
+setupToggle(ToggleESP, espEnabled, "ESP", "ESP", function(state) espEnabled = state if not state then espFolder:ClearAllChildren() end end)
+setupToggle(ToggleAim, aimbotEnabled, "AIMBOT HEAD", "AIMBOT HEAD", function(state) aimbotEnabled = state end)
+setupToggle(ToggleNoclip, noclipEnabled, "WALLHACK (NOCLIP)", "WALLHACK (NOCLIP)", function(state) noclipEnabled = state end)
+
+setupToggle(ToggleSpeed, speedEnabled, "SUPER SPEED", "SUPER SPEED", function(state) 
+    speedEnabled = state 
+    if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+    end
+end)
+
+setupToggle(ToggleJump, jumpEnabled, "SUPER JUMP", "SUPER JUMP", function(state) 
+    jumpEnabled = state 
+    if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = 50
     end
 end)
 
