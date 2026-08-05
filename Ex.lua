@@ -62,9 +62,10 @@ local TopStroke = Instance.new("UIStroke")
 TopStroke.Color = Color3.fromRGB(50, 50, 70)
 TopStroke.Parent = TopDetector
 
+-- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 280, 0, 440)
-MainFrame.Position = UDim2.new(0.5, -140, 0.22, 0)
+MainFrame.Size = UDim2.new(0, 280, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -140, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -80,6 +81,7 @@ MainStroke.Color = Color3.fromRGB(60, 60, 80)
 MainStroke.Thickness = 1.5
 MainStroke.Parent = MainFrame
 
+-- Header
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 45)
 Header.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
@@ -91,7 +93,7 @@ HeaderCorner.CornerRadius = UDim.new(0, 12)
 HeaderCorner.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -70, 1, 0)
+Title.Size = UDim2.new(1, -75, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "Rafael xiter"
@@ -101,10 +103,10 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Header
 
--- Tombol Close Aman (Teks Jelas & Lebar Pas)
+-- Tombol Tutup
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 50, 0, 28)
-CloseButton.Position = UDim2.new(1, -58, 0, 8)
+CloseButton.Size = UDim2.new(0, 55, 0, 28)
+CloseButton.Position = UDim2.new(1, -63, 0, 8)
 CloseButton.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
 CloseButton.Text = "TUTUP"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -116,38 +118,39 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 6)
 CloseCorner.Parent = CloseButton
 
+-- ScrollingFrame yang aman (posisi Y di bawah header, background transparan bersih)
 local ScrollingFrame = Instance.new("ScrollingFrame")
-ScrollingFrame.Size = UDim2.new(1, -12, 1, -55)
-ScrollingFrame.Position = UDim2.new(0, 6, 0, 50)
+ScrollingFrame.Size = UDim2.new(1, -16, 1, -58)
+ScrollingFrame.Position = UDim2.new(0, 8, 0, 50)
 ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 480)
-ScrollingFrame.ScrollBarThickness = 5
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 450)
+ScrollingFrame.ScrollBarThickness = 4
 ScrollingFrame.Parent = MainFrame
 
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.SortOrder = Enum.SortOrder.LayoutIndex
-UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Padding = UDim.new(0, 6)
 UIListLayout.Parent = ScrollingFrame
 
 local function createButton(order, defaultText)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -8, 0, 38)
-    btn.Position = UDim2.new(0, 4, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    btn.Size = UDim2.new(1, -4, 0, 36)
+    btn.Position = UDim2.new(0, 2, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
     btn.Text = defaultText .. " : OFF"
     btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-    btn.TextSize = 12
+    btn.TextSize = 11
     btn.Font = Enum.Font.GothamBold
     btn.LayoutOrder = order
     btn.Parent = ScrollingFrame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
+    corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = btn
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(70, 70, 90)
+    stroke.Color = Color3.fromRGB(60, 60, 80)
     stroke.Thickness = 1
     stroke.Parent = btn
 
@@ -165,7 +168,7 @@ local ToggleNoclip = createButton(8, "WALLHACK (NOCLIP)")
 local ToggleSpeed = createButton(9, "SUPER SPEED (EXTREME)")
 local ToggleJump = createButton(10, "SUPER JUMP")
 
--- Tombol Open Floating Aman
+-- Tombol Open Floating
 local OpenButton = Instance.new("TextButton")
 OpenButton.Size = UDim2.new(0, 120, 0, 38)
 OpenButton.Position = UDim2.new(0, 15, 0, 15)
@@ -390,7 +393,7 @@ local function setupToggle(button, onText, offText, callback)
             callback(true)
         else
             button.Text = offText .. " : OFF"
-            button.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+            button.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
             button.TextColor3 = Color3.fromRGB(220, 220, 220)
             callback(false)
         end
