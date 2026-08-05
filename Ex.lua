@@ -12,6 +12,7 @@ local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
+local aimbotSmooth = 0.3 -- Tingkat kelengketan aim (semakin kecil semakin halus/lengket)
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
@@ -281,11 +282,14 @@ RunService.RenderStepped:Connect(function()
         TopDetector.Text = "Players Detected: 0"
     end
 
-    -- 2. Aimbot Execution
+    -- 2. Aimbot Execution (Smooth & Sticky for One Tap)
     if aimbotEnabled and aiming then
         local target = getClosestPlayerToCursor()
         if target and target.Character and target.Character:FindFirstChild("Head") then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
+            local targetHead = target.Character.Head.Position
+            local currentCFrame = Camera.CFrame
+            local targetCFrame = CFrame.new(currentCFrame.Position, targetHead)
+            Camera.CFrame = currentCFrame:Lerp(targetCFrame, aimbotSmooth)
         end
     end
 
@@ -298,7 +302,7 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
--- 4. Super Speed & Super Jump Execution
+    -- 4. Super Speed & Super Jump Execution
     local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if hum then
