@@ -1,8 +1,19 @@
--- 1. Mengunggah Library Kavo UI 🖼️
+-- 1. Memuat Library Kavo UI 🖼️
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("Rafael Xiter 🚀", "Midnight")
 
--- 2. Memuat Tombol Bulat Melayang (Toggle UI) 🔘
+-- Fitur Membuat Jendela Menu Utama Bisa Digeser (Draggable) 🔀
+task.spawn(function()
+    local coreGui = game:GetService("CoreGui")
+    for _, gui in pairs(coreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
+            gui.Main.Active = true
+            gui.Main.Draggable = true -- Memungkinkan menu utama digeser
+        end
+    end
+end)
+
+-- 2. Membuat Tombol Bulat Melayang (Toggle UI) 🔘
 local ToggleScreen = Instance.new("ScreenGui")
 local ToggleButton = Instance.new("TextButton")
 local UICorner = Instance.new("UICorner")
@@ -21,7 +32,7 @@ ToggleButton.Text = "🚀"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 25.000
 ToggleButton.Active = true
-ToggleButton.Draggable = true
+ToggleButton.Draggable = true -- Tombol bulat bisa digeser di layar HP 📱
 
 UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = ToggleButton
@@ -34,6 +45,7 @@ end)
 local Tab1 = Window:NewTab("Teleport 📍")
 local Section1 = Tab1:NewSection("Pilih Player / Auto")
 
+-- Fungsi Mengambil Nama Pemain 👥
 local function getPlayerNames()
     local playerList = {}
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -46,7 +58,7 @@ end
 
 local selectedPlayer = ""
 
--- Dropdown Select Player 📜
+-- Menu Dropdown Pilih Pemain 📜
 local dropdown = Section1:NewDropdown("Pilih Pemain Target", "Pilih nama pemain", getPlayerNames(), function(option)
     selectedPlayer = option
 end)
@@ -107,9 +119,9 @@ Section1:NewToggle("Auto Teleport Terdekat", "Teleport otomatis ke yang terdekat
     end)
 end)
 
--- 4. Tab Fitur Utama (ESP & Fly) 📁
+-- 4. Tab Fitur Utama (ESP, Fly, & Masuk Rumah) 📁
 local Tab2 = Window:NewTab("Fitur 🛠️")
-local Section2 = Tab2:NewSection("ESP & Movement")
+local Section2 = Tab2:NewSection("ESP, Fly & Bypass")
 
 -- Fitur ESP 👁️
 local espEnabled = false
@@ -168,6 +180,22 @@ Section2:NewToggle("Fly (Terbang)", "Mengaktifkan mode terbang", function(state)
     else
         if hrp and hrp:FindFirstChild("FlyVelocity") then
             hrp.FlyVelocity:Destroy()
+        end
+    end
+end)
+
+-- Fitur Bypass Rumah Terkunci (Noclip) 🚪
+local noclipEnabled = false
+Section2:NewToggle("Bypass Kunci/Penghalang Rumah", "Bisa menembus pintu & dinding rumah", function(state)
+    noclipEnabled = state
+end)
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclipEnabled and game.Players.LocalPlayer.Character then
+        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
         end
     end
 end)
