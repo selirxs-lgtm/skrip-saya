@@ -13,6 +13,9 @@ local godModeEnabled = false
 local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
+local autoTeleportEnabled = false
+local autoKillEnabled = false
+
 local aiming = false
 local aimbotSmooth = 0.25 
 local fovRadius = 120    
@@ -20,11 +23,11 @@ local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenuV7_1"
+ScreenGui.Name = "AdvancedMenuV8"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Lingkaran FOV di Tengah Layar
+-- Lingkaran FOV
 local FOVCircle = Instance.new("Frame")
 FOVCircle.Name = "FOVCircle"
 FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -40,118 +43,176 @@ UICircle.Parent = FOVCircle
 
 local UIStroke = Instance.new("UIStroke")
 UIStroke.Thickness = 1.5
-UIStroke.Color = Color3.fromRGB(255, 255, 255)
+UIStroke.Color = Color3.fromRGB(0, 255, 200)
 UIStroke.Parent = FOVCircle
 
 -- Top Detector
 local TopDetector = Instance.new("TextLabel")
-TopDetector.Size = UDim2.new(0, 200, 0, 35)
-TopDetector.Position = UDim2.new(0.5, -100, 0, 10)
-TopDetector.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-TopDetector.BackgroundTransparency = 0.3
+TopDetector.Size = UDim2.new(0, 220, 0, 32)
+TopDetector.Position = UDim2.new(0.5, -110, 0, 12)
+TopDetector.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+TopDetector.BackgroundTransparency = 0.2
 TopDetector.Text = "Players Detected: 0"
 TopDetector.TextColor3 = Color3.fromRGB(0, 255, 150)
-TopDetector.TextSize = 14
-TopDetector.Font = Enum.Font.SourceSansBold
+TopDetector.TextSize = 13
+TopDetector.Font = Enum.Font.GothamBold
 TopDetector.Parent = ScreenGui
 
 local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 6)
+TopCorner.CornerRadius = UDim.new(0, 8)
 TopCorner.Parent = TopDetector
 
--- Menu Frame
+local TopStroke = Instance.new("UIStroke")
+TopStroke.Color = Color3.fromRGB(50, 50, 70)
+TopStroke.Parent = TopDetector
+
+-- Menu Frame (Modern UI Style)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 240, 0, 460)
-MainFrame.Position = UDim2.new(0.5, -120, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.Size = UDim2.new(0, 260, 0, 530)
+MainFrame.Position = UDim2.new(0.5, -130, 0.18, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
-UICorner.Parent = MainFrame
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(60, 60, 80)
+MainStroke.Thickness = 1.5
+MainStroke.Parent = MainFrame
+
+-- Top Bar / Header
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+Header.BorderSizePixel = 0
+Header.Parent = MainFrame
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 0, 35)
-Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "ROBLOX MENU V7.1 (ULTRA GOD)"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "ROBLOX MENU V8"
+Title.TextColor3 = Color3.fromRGB(0, 255, 200)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Font = Enum.Font.SourceSansBold
-Title.Parent = MainFrame
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Header
 
--- Close Button (X)
+-- Close Button (Modern Minimalist X)
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(1, -35, 0, 3)
-CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseButton.Text = "X"
+CloseButton.Size = UDim2.new(0, 28, 0, 28)
+CloseButton.Position = UDim2.new(1, -36, 0, 8)
+CloseButton.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
+CloseButton.Text = "✕"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 14
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.Parent = MainFrame
+CloseButton.TextSize = 13
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = Header
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.CornerRadius = UDim.new(0, 8)
 CloseCorner.Parent = CloseButton
 
--- Helper Function to Create Toggle Buttons
-local function createButton(posY, defaultText)
+-- Scrollable Content Area
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Size = UDim2.new(1, -10, 1, -95)
+ScrollingFrame.Position = UDim2.new(0, 5, 0, 50)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 430)
+ScrollingFrame.ScrollBarThickness = 3
+ScrollingFrame.Parent = MainFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.SortOrder = Enum.SortOrder.LayoutIndex
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Parent = ScrollingFrame
+
+-- Helper Function for Modern Buttons
+local function createButton(order, defaultText)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 210, 0, 35)
-    btn.Position = UDim2.new(0.5, -105, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    btn.Text = defaultText .. ": OFF"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 14
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Parent = MainFrame
+    btn.Size = UDim2.new(1, -10, 0, 38)
+    btn.Position = UDim2.new(0, 5, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    btn.Text = defaultText .. " : OFF"
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.LayoutOrder = order
+    btn.Parent = ScrollingFrame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(55, 55, 70)
+    stroke.Thickness = 1
+    stroke.Parent = btn
+
     return btn
 end
 
-local ToggleESP = createButton(45, "ESP")
-local ToggleAim = createButton(85, "AIMBOT (BODY/HEAD)")
-local ToggleGod = createButton(125, "UNLIMITED HEALTH")
-local ToggleFOV = createButton(165, "FOV CIRCLE") 
-local ToggleSizeFOV = createButton(205, "FOV SIZE: 120") 
-local ToggleNoclip = createButton(245, "WALLHACK (NOCLIP)")
-local ToggleSpeed = createButton(285, "SUPER SPEED")
-local ToggleJump = createButton(325, "SUPER JUMP")
+local ToggleESP = createButton(1, "ESP")
+local ToggleAim = createButton(2, "AIMBOT (BODY/HEAD)")
+local ToggleGod = createButton(3, "UNLIMITED HEALTH")
+local ToggleTeleport = createButton(4, "AUTO TELEPORT TO ENEMY")
+local ToggleKill = createButton(5, "AUTO KILL (INSTANT)")
+local ToggleFOV = createButton(6, "FOV CIRCLE") 
+local ToggleSizeFOV = createButton(7, "FOV SIZE: 120") 
+local ToggleNoclip = createButton(8, "WALLHACK (NOCLIP)")
+local ToggleSpeed = createButton(9, "SUPER SPEED (EXTREME)")
+local ToggleJump = createButton(10, "SUPER JUMP")
 
--- Info Label
+-- Footer Info
+local Footer = Instance.new("Frame")
+Footer.Size = UDim2.new(1, 0, 0, 35)
+Footer.Position = UDim2.new(0, 0, 1, -38)
+Footer.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+Footer.Parent = MainFrame
+
+local FooterCorner = Instance.new("UICorner")
+FooterCorner.CornerRadius = UDim.new(0, 12)
+FooterCorner.Parent = Footer
+
 local InfoText = Instance.new("TextLabel")
-InfoText.Size = UDim2.new(1, 0, 0, 25)
-InfoText.Position = UDim2.new(0, 0, 0, 375)
+InfoText.Size = UDim2.new(1, 0, 1, 0)
 InfoText.BackgroundTransparency = 1
 InfoText.Text = "Hold Right-Click for Aimbot"
-InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
-InfoText.TextSize = 12
-InfoText.Font = Enum.Font.SourceSansItalic
-InfoText.Parent = MainFrame
+InfoText.TextColor3 = Color3.fromRGB(130, 130, 150)
+InfoText.TextSize = 11
+InfoText.Font = Enum.Font.GothamItalic
+InfoText.Parent = Footer
 
--- Open Button
+-- Open Menu Floating Button (Modern Circular/Rounded Pill Style)
 local OpenButton = Instance.new("TextButton")
-OpenButton.Size = UDim2.new(0, 100, 0, 30)
-OpenButton.Position = UDim2.new(0, 10, 0, 10)
-OpenButton.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-OpenButton.Text = "OPEN MENU"
-OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.Size = UDim2.new(0, 120, 0, 38)
+OpenButton.Position = UDim2.new(0, 15, 0, 15)
+OpenButton.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
+OpenButton.Text = "⚡ OPEN MENU"
+OpenButton.TextColor3 = Color3.fromRGB(15, 15, 20)
 OpenButton.TextSize = 12
-OpenButton.Font = Enum.Font.SourceSansBold
+OpenButton.Font = Enum.Font.GothamBold
 OpenButton.Visible = false
 OpenButton.Parent = ScreenGui
 
 local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(0, 6)
+OpenCorner.CornerRadius = UDim.new(0, 10)
 OpenCorner.Parent = OpenButton
+
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color = Color3.fromRGB(255, 255, 255)
+OpenStroke.Thickness = 1.5
+OpenStroke.Parent = OpenButton
 
 -----------------------------------------
 -- ESP Storage Setup
@@ -169,7 +230,7 @@ local function removeESP(player)
 end
 
 -----------------------------------------
--- Aimbot Logic: Mengunci ke Seluruh Bagian Tubuh
+-- Aimbot Target Logic
 -----------------------------------------
 local function getClosestPartInFOV()
     local closestPart = nil
@@ -258,8 +319,8 @@ RunService.RenderStepped:Connect(function()
             label.Size = UDim2.new(1, 0, 1, 0)
             label.TextColor3 = Color3.fromRGB(255, 255, 255)
             label.TextStrokeTransparency = 0
-            label.TextSize = 14
-            label.Font = Enum.Font.SourceSansBold
+            label.TextSize = 13
+            label.Font = Enum.Font.GothamBold
         end
         billboard.Adornee = head
         billboard:FindFirstChild("PlayerName").Text = player.Name
@@ -280,10 +341,10 @@ RunService.RenderStepped:Connect(function()
         if not beam then
             beam = Instance.new("Beam")
             beam.Name = "TracerBeam"
-            beam.Width0 = 0.05
-            beam.Width1 = 0.05
+            beam.Width0 = 0.04
+            beam.Width1 = 0.04
             beam.FaceCamera = true
-            beam.Color = ColorSequence.new(Color3.fromRGB(255, 50, 50))
+            beam.Color = ColorSequence.new(Color3.fromRGB(0, 255, 150))
             beam.Transparency = NumberSequence.new(0)
         end
 
@@ -311,7 +372,7 @@ RunService.RenderStepped:Connect(function()
         TopDetector.Text = "Players Detected: 0"
     end
 
-    -- 2. Sticky Aimbot Execution
+    -- 2. Aimbot Execution
     if aimbotEnabled and aiming then
         local targetPart = getClosestPartInFOV()
         if targetPart then
@@ -321,50 +382,80 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- 3. Ultra God Mode Execution
+    -- 3. God Mode (Anti-Death & Anti-Damage Loop)
     if godModeEnabled and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if hum then
             hum.Health = hum.MaxHealth
             pcall(function()
                 hum.BreakJointsOnDeath = false
+                hum.RequiresNeck = false
             end)
         end
     end
 
-    -- 4. Noclip Execution
+    -- 4. Auto Teleport to Enemy (Teleport instan di belakang musuh terdekat)
+    if autoTeleportEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local myRoot = LocalPlayer.Character.HumanoidRootPart
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local enemyHum = player.Character:FindFirstChildOfClass("Humanoid")
+                if enemyHum and enemyHum.Health > 0 then
+                    myRoot.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                    break
+                end
+            end
+        end
+    end
+
+    -- 5. Auto Kill (Membuat HP musuh langsung jadi 0 secara otomatis)
+    if autoKillEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local enemyHum = player.Character:FindFirstChildOfClass("Humanoid")
+                if enemyHum and enemyHum.Health > 0 then
+                    pcall(function()
+                        enemyHum.Health = 0
+                    end)
+                end
+            end
+        end
+    end
+
+    -- 6. Noclip Execution
     if noclipEnabled and LocalPlayer.Character then
-        local char = LocalPlayer.Character
-        for _, part in ipairs(char:GetDescendants()) do
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
             end
         end
     end
 
-    -- 5. Super Speed & Super Jump Execution
+    -- 7. Super Speed Extreme & Super Jump
     local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if hum then
         if speedEnabled then
-            hum.WalkSpeed = 100
+            hum.WalkSpeed = 250 -- Jauh lebih kencang gila
         end
         if jumpEnabled then
-            hum.JumpPower = 150
+            hum.JumpPower = 200
         end
     end
 end)
 
--- Button Click Handlers
+-- Button State Manager
 local function setupToggle(button, onText, offText, callback)
     button.MouseButton1Click:Connect(function()
         if button.Text:find("OFF") then
-            button.Text = onText .. ": ON"
-            button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+            button.Text = onText .. " : ON"
+            button.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
             callback(true)
         else
-            button.Text = offText .. ": OFF"
-            button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            button.Text = offText .. " : OFF"
+            button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            button.TextColor3 = Color3.fromRGB(200, 200, 200)
             callback(false)
         end
     end)
@@ -373,6 +464,8 @@ end
 setupToggle(ToggleESP, "ESP", "ESP", function(state) espEnabled = state if not state then espFolder:ClearAllChildren() end end)
 setupToggle(ToggleAim, "AIMBOT (BODY/HEAD)", "AIMBOT (BODY/HEAD)", function(state) aimbotEnabled = state end)
 setupToggle(ToggleGod, "UNLIMITED HEALTH", "UNLIMITED HEALTH", function(state) godModeEnabled = state end)
+setupToggle(ToggleTeleport, "AUTO TELEPORT TO ENEMY", "AUTO TELEPORT TO ENEMY", function(state) autoTeleportEnabled = state end)
+setupToggle(ToggleKill, "AUTO KILL (INSTANT)", "AUTO KILL (INSTANT)", function(state) autoKillEnabled = state end)
 
 setupToggle(ToggleFOV, "FOV CIRCLE", "FOV CIRCLE", function(state) 
     fovCircleVisible = state 
@@ -391,14 +484,13 @@ ToggleSizeFOV.MouseButton1Click:Connect(function()
     else
         fovRadius = 120
     end
-    
     FOVCircle.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
     ToggleSizeFOV.Text = "FOV SIZE: " .. tostring(fovRadius)
 end)
 
 setupToggle(ToggleNoclip, "WALLHACK (NOCLIP)", "WALLHACK (NOCLIP)", function(state) noclipEnabled = state end)
 
-setupToggle(ToggleSpeed, "SUPER SPEED", "SUPER SPEED", function(state) 
+setupToggle(ToggleSpeed, "SUPER SPEED (EXTREME)", "SUPER SPEED (EXTREME)", function(state) 
     speedEnabled = state 
     if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
@@ -412,7 +504,7 @@ setupToggle(ToggleJump, "SUPER JUMP", "SUPER JUMP", function(state)
     end
 end)
 
--- Close / Open Menu Logic
+-- Smooth Close/Open UI Toggle
 CloseButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
     OpenButton.Visible = true
