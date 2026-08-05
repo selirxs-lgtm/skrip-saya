@@ -5,7 +5,6 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- Configuration
 local espEnabled = false
 local aimbotEnabled = false
 local fovCircleVisible = false 
@@ -21,13 +20,11 @@ local aimbotSmooth = 0.25
 local fovRadius = 120    
 local ESP_FOLDER_NAME = "ESP_Storage"
 
--- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenuV8_1"
+ScreenGui.Name = "RafaelXiter_Gui"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Lingkaran FOV
 local FOVCircle = Instance.new("Frame")
 FOVCircle.Name = "FOVCircle"
 FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -46,7 +43,6 @@ UIStroke.Thickness = 1.5
 UIStroke.Color = Color3.fromRGB(0, 255, 200)
 UIStroke.Parent = FOVCircle
 
--- Top Detector
 local TopDetector = Instance.new("TextLabel")
 TopDetector.Size = UDim2.new(0, 220, 0, 32)
 TopDetector.Position = UDim2.new(0.5, -110, 0, 12)
@@ -66,11 +62,10 @@ local TopStroke = Instance.new("UIStroke")
 TopStroke.Color = Color3.fromRGB(50, 50, 70)
 TopStroke.Parent = TopDetector
 
--- Menu Frame (Fixed Height & CanvasSize)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 270, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -135, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.Size = UDim2.new(0, 280, 0, 440)
+MainFrame.Position = UDim2.new(0.5, -140, 0.22, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -85,10 +80,9 @@ MainStroke.Color = Color3.fromRGB(60, 60, 80)
 MainStroke.Thickness = 1.5
 MainStroke.Parent = MainFrame
 
--- Top Bar / Header
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
@@ -97,20 +91,19 @@ HeaderCorner.CornerRadius = UDim.new(0, 12)
 HeaderCorner.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Size = UDim2.new(1, -45, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "ROBLOX MENU V8.1"
+Title.Text = "Rafael xiter"
 Title.TextColor3 = Color3.fromRGB(0, 255, 200)
-Title.TextSize = 13
+Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Header
 
--- Close Button
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 26, 0, 26)
-CloseButton.Position = UDim2.new(1, -34, 0, 7)
+CloseButton.Size = UDim2.new(0, 28, 0, 28)
+CloseButton.Position = UDim2.new(1, -36, 0, 8)
 CloseButton.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
 CloseButton.Text = "✕"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -119,43 +112,41 @@ CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = Header
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.CornerRadius = UDim.new(0, 8)
 CloseCorner.Parent = CloseButton
 
--- Scrollable Content Area
 local ScrollingFrame = Instance.new("ScrollingFrame")
-ScrollingFrame.Size = UDim2.new(1, -10, 1, -50)
-ScrollingFrame.Position = UDim2.new(0, 5, 0, 45)
+ScrollingFrame.Size = UDim2.new(1, -12, 1, -55)
+ScrollingFrame.Position = UDim2.new(0, 6, 0, 50)
 ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 410)
-ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 480)
+ScrollingFrame.ScrollBarThickness = 5
 ScrollingFrame.Parent = MainFrame
 
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.SortOrder = Enum.SortOrder.LayoutIndex
-UIListLayout.Padding = UDim.new(0, 6)
+UIListLayout.Padding = UDim.new(0, 8)
 UIListLayout.Parent = ScrollingFrame
 
--- Helper Function for Buttons
 local function createButton(order, defaultText)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 34)
-    btn.Position = UDim2.new(0, 5, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    btn.Size = UDim2.new(1, -8, 0, 38)
+    btn.Position = UDim2.new(0, 4, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     btn.Text = defaultText .. " : OFF"
-    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    btn.TextSize = 11
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.LayoutOrder = order
     btn.Parent = ScrollingFrame
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = btn
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(55, 55, 70)
+    stroke.Color = Color3.fromRGB(70, 70, 90)
     stroke.Thickness = 1
     stroke.Parent = btn
 
@@ -173,7 +164,6 @@ local ToggleNoclip = createButton(8, "WALLHACK (NOCLIP)")
 local ToggleSpeed = createButton(9, "SUPER SPEED (EXTREME)")
 local ToggleJump = createButton(10, "SUPER JUMP")
 
--- Open Menu Floating Button
 local OpenButton = Instance.new("TextButton")
 OpenButton.Size = UDim2.new(0, 110, 0, 35)
 OpenButton.Position = UDim2.new(0, 15, 0, 15)
@@ -189,7 +179,6 @@ local OpenCorner = Instance.new("UICorner")
 OpenCorner.CornerRadius = UDim.new(0, 8)
 OpenCorner.Parent = OpenButton
 
--- ESP Storage Setup
 local espFolder = workspace:FindFirstChild(ESP_FOLDER_NAME)
 if espFolder then espFolder:Destroy() end
 espFolder = Instance.new("Folder")
@@ -246,7 +235,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Main Loop
 RunService.RenderStepped:Connect(function()
     local detectedCount = 0
 
@@ -400,8 +388,8 @@ local function setupToggle(button, onText, offText, callback)
             callback(true)
         else
             button.Text = offText .. " : OFF"
-            button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-            button.TextColor3 = Color3.fromRGB(200, 200, 200)
+            button.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+            button.TextColor3 = Color3.fromRGB(220, 220, 220)
             callback(false)
         end
     end)
