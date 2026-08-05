@@ -1,5 +1,5 @@
 -- ==========================================
--- RAFAEL XITER 🚀 - 10 TROLL TABS (100 FITUR + TARGET SELECTOR)
+-- RAFAEL XITER 🚀 - 10 TABS + DROPDOWN TARGET SELECTOR
 -- ==========================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -33,15 +33,15 @@ local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleButton
 
--- Main Frame (Diperlebar dikit biar muat dropdown target)
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -170)
-MainFrame.Size = UDim2.new(0, 400, 0, 340)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -185)
+MainFrame.Size = UDim2.new(0, 400, 0, 370)
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.ClipsDescendants = true
+MainFrame.ClipsDescendants = false -- Biar dropdown list bisa keluar kotak kalau dibuka
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
@@ -59,7 +59,7 @@ TitleLabel.BackgroundTransparency = 1
 TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.Size = UDim2.new(1, -24, 1, 0)
 TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "Rafael Xiter 🚀 [10 TABS + TARGET SELECTOR]"
+TitleLabel.Text = "Rafael Xiter 🚀 [DROPDOWN SELECTOR]"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.TextSize = 12
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -68,45 +68,96 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Target Selector Box di Atas
+-- ================= DROPDOWN SELECTOR PLAYER =================
 local SelectedTarget = nil
-local TargetBox = Instance.new("TextBox")
-TargetBox.Parent = MainFrame
-TargetBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-TargetBox.Position = UDim2.new(0.04, 0, 0, 40)
-TargetBox.Size = UDim2.new(0.92, 0, 0, 25)
-TargetBox.Font = Enum.Font.SourceSansBold
-TargetBox.PlaceholderText = "Ketik Nama Target (Contoh: Player1)"
-TargetBox.Text = ""
-TargetBox.TextColor3 = Color3.fromRGB(0, 255, 255)
-TargetBox.TextSize = 11
 
-local TargetCorner = Instance.new("UICorner")
-TargetCorner.CornerRadius = UDim.new(0, 5)
-TargetCorner.Parent = TargetBox
+local DropdownBtn = Instance.new("TextButton")
+DropdownBtn.Parent = MainFrame
+DropdownBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+DropdownBtn.Position = UDim2.new(0.04, 0, 0, 42)
+DropdownBtn.Size = UDim2.new(0.92, 0, 0, 30)
+DropdownBtn.Font = Enum.Font.SourceSansBold
+DropdownBtn.Text = "🎯 Pilih Target: [Klik untuk Buka List]"
+DropdownBtn.TextColor3 = Color3.fromRGB(0, 255, 255)
+DropdownBtn.TextSize = 11
 
-TargetBox.FocusLost:Connect(function()
-    local name = TargetBox.Text:lower()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p.Name:lower():sub(1, #name) == name or p.DisplayName:lower():sub(1, #name) == name then
-            SelectedTarget = p
-            TargetBox.Text = "Target: " .. p.Name
-            return
+local DropdownCorner = Instance.new("UICorner")
+DropdownCorner.CornerRadius = UDim.new(0, 5)
+DropdownCorner.Parent = DropdownBtn
+
+-- Container List Player (Dropdown Menu)
+local DropdownList = Instance.new("ScrollingFrame")
+DropdownList.Parent = MainFrame
+DropdownList.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+DropdownList.Position = UDim2.new(0.04, 0, 0, 75)
+DropdownList.Size = UDim2.new(0.92, 0, 0, 100)
+DropdownList.Visible = false
+DropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
+DropdownList.ScrollBarThickness = 4
+DropdownList.ZIndex = 5
+
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.Parent = DropdownList
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0, 3)
+
+local function refreshPlayerList()
+    -- Hapus list lama
+    for _, v in pairs(DropdownList:GetChildren()) do
+        if v:IsA("TextButton") then
+            v:Destroy()
         end
     end
-    SelectedTarget = nil
-    TargetBox.Text = "Target Tidak Ditemukan!"
+
+    local count = 0
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            count = count + 1
+            local pBtn = Instance.new("TextButton")
+            pBtn.Parent = DropdownList
+            pBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            pBtn.Size = UDim2.new(1, 0, 0, 25)
+            pBtn.Font = Enum.Font.SourceSans
+            pBtn.Text = "👤 " .. p.Name .. " (" .. p.DisplayName .. ")"
+            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            pBtn.TextSize = 11
+            pBtn.ZIndex = 6
+
+            pBtn.MouseButton1Click:Connect(function()
+                SelectedTarget = p
+                DropdownBtn.Text = "🎯 Target Aktif: " .. p.Name
+                DropdownList.Visible = false
+            end)
+        end
+    end
+    DropdownList.CanvasSize = UDim2.new(0, 0, 0, count * 28)
+end
+
+DropdownBtn.MouseButton1Click:Connect(function()
+    DropdownList.Visible = not DropdownList.Visible
+    if DropdownList.Visible then
+        refreshPlayerList()
+    end
+end)
+
+Players.PlayerAdded:Connect(function() if DropdownList.Visible then refreshPlayerList() end end)
+Players.PlayerRemoving:Connect(function(p) 
+    if SelectedTarget == p then 
+        SelectedTarget = nil 
+        DropdownBtn.Text = "🎯 Target Keluar! Pilih Lagi" 
+    end 
+    if DropdownList.Visible then refreshPlayerList() end 
 end)
 
 local function getTargetPlayer()
     return SelectedTarget and SelectedTarget.Character and SelectedTarget.Character:FindFirstChild("HumanoidRootPart") and SelectedTarget
 end
 
--- Tab Bar (Dibikin 2 Baris / Scrolling Tab Bar biar muat 10 tab)
+-- ================= TAB BAR & KONTEN =================
 local TabBar = Instance.new("ScrollingFrame")
 TabBar.Parent = MainFrame
 TabBar.BackgroundTransparency = 1
-TabBar.Position = UDim2.new(0, 0, 0, 70)
+TabBar.Position = UDim2.new(0, 0, 0, 80) -- Digeser sedikit ke bawah karena dropdown di atas
 TabBar.Size = UDim2.new(1, 0, 0, 30)
 TabBar.CanvasSize = UDim2.new(0, 550, 0, 0)
 TabBar.ScrollBarThickness = 0
@@ -114,8 +165,8 @@ TabBar.ScrollBarThickness = 0
 local ContentContainer = Instance.new("Frame")
 ContentContainer.Parent = MainFrame
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.Position = UDim2.new(0, 0, 0, 105)
-ContentContainer.Size = UDim2.new(1, 0, 1, -105)
+ContentContainer.Position = UDim2.new(0, 0, 0, 115)
+ContentContainer.Size = UDim2.new(1, 0, 1, -115)
 
 local tabs = {}
 
@@ -180,7 +231,7 @@ local function addButton(parentScroll, text, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- Membuat 10 Tab (Tab 1-5 Massal, Tab 6-10 Target Specific)
+-- Membuat 10 Tab
 local t1 = createTab("All 1", 1)
 local t2 = createTab("All 2", 2)
 local t3 = createTab("All 3", 3)
@@ -314,7 +365,7 @@ addButton(t5, "10. Hancurkan GUI Ini ❌", function() if CoreGui:FindFirstChild(
 
 
 -- ==========================================
--- TAB 6-10: TARGET SELECTOR TROLL (10 FITUR PER TAB)
+-- TAB 6-10: TARGET SELECTOR TROLL
 -- ==========================================
 
 -- ================= TAB 6: TARGET 1 (1-10) =================
