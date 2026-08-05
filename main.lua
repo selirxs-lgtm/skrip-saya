@@ -1,238 +1,500 @@
--- 1. Memuat Library Kavo UI 🖼️
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Rafael Xiter 🚀", "Midnight")
+-- ==========================================
+-- RAFAEL XITER 🚀 - ULTIMATE MOBILE GUI
+-- ==========================================
 
-local mainFrame = nil
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
 
--- Mencari Frame Utama & Mengatur Fungsi Draggable 🔀
-task.spawn(function()
-    local coreGui = game:GetService("CoreGui")
-    for _, gui in pairs(coreGui:GetChildren()) do
-        if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
-            mainFrame = gui.Main
-            mainFrame.Active = true
-            mainFrame.Draggable = true
-        end
-    end
-end)
-
--- Fungsi Mematikan Drag UI Saat Menggunakan Slider (Khusus HP 📱)
-local function preventSliderDrag(sliderInstance)
-    task.spawn(function()
-        -- Mencari objek visual slider di dalam UI
-        local sliderGuiObject = sliderInstance
-        if typeof(sliderInstance) == "table" and sliderInstance.Instance then
-            sliderGuiObject = sliderInstance.Instance
-        end
-        
-        if typeof(sliderGuiObject) == "Instance" then
-            sliderGuiObject.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    if mainFrame then
-                        mainFrame.Draggable = false -- Matikan geser menu sementara 🛑
-                    end
-                end
-            end)
-            
-            sliderGuiObject.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    if mainFrame then
-                        mainFrame.Draggable = true -- Aktifkan kembali geser menu 🟢
-                    end
-                end
-            end)
-        end
-    end)
+-- Hapus UI lama jika ada
+if CoreGui:FindFirstChild("RafaelXiterUI") then
+    CoreGui.RafaelXiterUI:Destroy()
 end
 
--- 2. Membuat Tombol Bulat Melayang (Toggle UI) 🔘
-local ToggleScreen = Instance.new("ScreenGui")
-local ToggleButton = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
+-- ScreenGui Utama
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RafaelXiterUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
 
-ToggleScreen.Name = "TeleportToggleUI"
-ToggleScreen.Parent = game.CoreGui
-ToggleScreen.ResetOnSpawn = false
+-- Variabel RGB & UI Tracking
+local rgbElements = {}
+local isRgbActive = false
+local activeSlider = nil
+
+-- ------------------------------------------
+-- 1. TOMBOL TOGGLE BULAT (FLOATING BUTTON) 🔘
+-- ------------------------------------------
+local ToggleButton = Instance.new("TextButton")
+local ToggleCorner = Instance.new("UICorner")
 
 ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ToggleScreen
-ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-ToggleButton.Position = UDim2.new(0, 10, 0.4, 0)
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+ToggleButton.Position = UDim2.new(0, 15, 0.35, 0)
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.Text = "🚀"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.TextSize = 25.000
+ToggleButton.TextSize = 26
 ToggleButton.Active = true
-ToggleButton.Draggable = true 
+ToggleButton.Draggable = true
 
-UICorner.CornerRadius = UDim.new(1, 0)
-UICorner.Parent = ToggleButton
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleButton
 
--- Kontrol Buka/Tutup UI Menggunakan Properti Visible 👁️
+-- ------------------------------------------
+-- 2. MAIN FRAME (LAYAR UTAMA UI) 🖼️
+-- ------------------------------------------
+local MainFrame = Instance.new("Frame")
+local MainCorner = Instance.new("UICorner")
+local Header = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 350, 0, 300)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
+
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+table.insert(rgbElements, MainFrame)
+
+-- Header Bar
+Header.Name = "Header"
+Header.Parent = MainFrame
+Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Header.Size = UDim2.new(1, 0, 0, 35)
+
+TitleLabel.Parent = Header
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
+TitleLabel.Size = UDim2.new(1, -24, 1, 0)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "Rafael Xiter 🚀"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 18
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+table.insert(rgbElements, Header)
+
+-- Event Buka / Tutup UI
 ToggleButton.MouseButton1Click:Connect(function()
-    if mainFrame then
-        mainFrame.Visible = not mainFrame.Visible
-    else
-        local coreGui = game:GetService("CoreGui")
-        for _, gui in pairs(coreGui:GetChildren()) do
-            if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
-                mainFrame = gui.Main
-                mainFrame.Visible = not mainFrame.Visible
-            end
-        end
-    end
+    MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Fungsi Memuat Nama Pemain 👥
+-- ------------------------------------------
+-- 3. KONTROL TAB & CONTAINER 📁
+-- ------------------------------------------
+local TabBar = Instance.new("Frame")
+TabBar.Name = "TabBar"
+TabBar.Parent = MainFrame
+TabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TabBar.Position = UDim2.new(0, 0, 0, 35)
+TabBar.Size = UDim2.new(1, 0, 0, 30)
+
+table.insert(rgbElements, TabBar)
+
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Name = "ContentContainer"
+ContentContainer.Parent = MainFrame
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.Position = UDim2.new(0, 0, 0, 65)
+ContentContainer.Size = UDim2.new(1, 0, 1, -65)
+
+local tabs = {}
+local activeTab = nil
+
+local function createTab(name)
+    local tabCount = #tabs
+    local tabBtn = Instance.new("TextButton")
+    tabBtn.Parent = TabBar
+    tabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    tabBtn.Size = UDim2.new(0.25, -2, 1, 0)
+    tabBtn.Position = UDim2.new(0.25 * tabCount, 1, 0, 0)
+    tabBtn.Font = Enum.Font.SourceSansBold
+    tabBtn.Text = name
+    tabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    tabBtn.TextSize = 12
+
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Parent = ContentContainer
+    scroll.BackgroundTransparency = 1
+    scroll.Size = UDim2.new(1, 0, 1, 0)
+    scroll.Visible = false
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scroll.ScrollBarThickness = 4
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Parent = scroll
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, 8)
+
+    listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scroll.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 15)
+    end)
+
+    table.insert(rgbElements, tabBtn)
+
+    tabBtn.MouseButton1Click:Connect(function()
+        for _, t in pairs(tabs) do
+            t.Scroll.Visible = false
+            t.Button.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+        scroll.Visible = true
+        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+
+    local tabData = {Button = tabBtn, Scroll = scroll}
+    table.insert(tabs, tabData)
+
+    if #tabs == 1 then
+        scroll.Visible = true
+        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+
+    return scroll
+end
+
+-- ------------------------------------------
+-- 4. LOGIKA SLIDER BEBAS BUG 📱
+-- ------------------------------------------
+local sliderIdCounter = 0
+
+local function addSlider(parentScroll, text, min, max, default, callback)
+    sliderIdCounter = sliderIdCounter + 1
+    local mySliderId = "Slider_" .. sliderIdCounter
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.92, 0, 0, 45)
+    frame.Position = UDim2.new(0.04, 0, 0, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.Parent = parentScroll
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = frame
+
+    table.insert(rgbElements, frame)
+
+    local label = Instance.new("TextLabel")
+    label.Parent = frame
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0, 10, 0, 4)
+    label.Size = UDim2.new(1, -20, 0, 18)
+    label.Font = Enum.Font.SourceSans
+    label.Text = text .. ": " .. tostring(default)
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local bar = Instance.new("Frame")
+    bar.Parent = frame
+    bar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    bar.Position = UDim2.new(0, 10, 0, 26)
+    bar.Size = UDim2.new(1, -20, 0, 10)
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = bar
+
+    local fill = Instance.new("Frame")
+    fill.Parent = bar
+    fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    local initScale = math.clamp((default - min) / (max - min), 0, 1)
+    fill.Size = UDim2.new(initScale, 0, 1, 0)
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = fill
+
+    local function updateValue(inputX)
+        local barX = bar.AbsolutePosition.X
+        local barWidth = bar.AbsoluteSize.X
+        if barWidth <= 0 then return end
+
+        local scale = math.clamp((inputX - barX) / barWidth, 0, 1)
+        fill.Size = UDim2.new(scale, 0, 1, 0)
+
+        local val = math.floor(min + (max - min) * scale)
+        label.Text = text .. ": " .. tostring(val)
+        callback(val)
+    end
+
+    -- Sentuhan dimulainya slider HANYA jika mengenai area bar
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            activeSlider = mySliderId
+            MainFrame.Draggable = false -- Matikan geser menu saat slider disentuh
+            updateValue(input.Position.X)
+        end
+    end)
+
+    -- Global Input Tracking
+    UserInputService.InputChanged:Connect(function(input)
+        if activeSlider == mySliderId and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateValue(input.Position.X)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if activeSlider == mySliderId and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+            activeSlider = nil
+            MainFrame.Draggable = true -- Aktifkan kembali geser menu
+        end
+    end)
+end
+
+-- Helper Komponen UI Lainnya
+local function addButton(parentScroll, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.92, 0, 0, 32)
+    btn.Position = UDim2.new(0.04, 0, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 13
+    btn.Parent = parentScroll
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+
+    btn.MouseButton1Click:Connect(callback)
+end
+
+local function addToggle(parentScroll, text, defaultState, callback)
+    local state = defaultState or false
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.92, 0, 0, 32)
+    btn.Position = UDim2.new(0.04, 0, 0, 0)
+    btn.BackgroundColor3 = state and Color3.fromRGB(0, 150, 75) or Color3.fromRGB(45, 45, 45)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text .. (state and " [ON]" or " [OFF]")
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 13
+    btn.Parent = parentScroll
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.BackgroundColor3 = state and Color3.fromRGB(0, 150, 75) or Color3.fromRGB(45, 45, 45)
+        btn.Text = text .. (state and " [ON]" or " [OFF]")
+        callback(state)
+    end)
+end
+
+local function addDropdown(parentScroll, text, getOptionsFunc, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.92, 0, 0, 32)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.Parent = parentScroll
+    frame.ClipsDescendants = true
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = frame
+
+    table.insert(rgbElements, frame)
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 32)
+    btn.BackgroundTransparency = 1
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text .. " 🔽"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 13
+    btn.Parent = frame
+
+    local optContainer = Instance.new("Frame")
+    optContainer.Position = UDim2.new(0, 0, 0, 32)
+    optContainer.Size = UDim2.new(1, 0, 0, 0)
+    optContainer.BackgroundTransparency = 1
+    optContainer.Parent = frame
+
+    local optLayout = Instance.new("UIListLayout")
+    optLayout.Parent = optContainer
+
+    local expanded = false
+    btn.MouseButton1Click:Connect(function()
+        expanded = not expanded
+        if expanded then
+            for _, child in pairs(optContainer:GetChildren()) do
+                if child:IsA("TextButton") then child:Destroy() end
+            end
+            local opts = getOptionsFunc()
+            local totalHeight = 0
+            for _, optName in pairs(opts) do
+                local oBtn = Instance.new("TextButton")
+                oBtn.Size = UDim2.new(1, 0, 0, 25)
+                oBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                oBtn.Font = Enum.Font.SourceSans
+                oBtn.Text = optName
+                oBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                oBtn.TextSize = 12
+                oBtn.Parent = optContainer
+                totalHeight = totalHeight + 25
+
+                oBtn.MouseButton1Click:Connect(function()
+                    btn.Text = text .. ": " .. optName
+                    expanded = false
+                    frame.Size = UDim2.new(0.92, 0, 0, 32)
+                    callback(optName)
+                end)
+            end
+            frame.Size = UDim2.new(0.92, 0, 0, 32 + totalHeight)
+        else
+            frame.Size = UDim2.new(0.92, 0, 0, 32)
+        end
+    end)
+end
+
+-- Helper Pemain
 local function getPlayerNames()
-    local playerList = {}
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer then
-            table.insert(playerList, player.Name)
+    local list = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(list, p.Name)
         end
     end
-    return playerList
+    return list
 end
 
--- 3. Tab Teleport Player 📁
-local Tab1 = Window:NewTab("Teleport 📍")
-local Section1 = Tab1:NewSection("Pilih Player / Auto")
+-- ==========================================
+-- 5. MEMBUAT TAB & FITUR-FITUR
+-- ==========================================
 
-local selectedPlayer = ""
+-- TAB 1: TELEPORT 📍
+local tab1 = createTab("Teleport 📍")
+local selectedTeleportPlayer = ""
 
-local dropdown = Section1:NewDropdown("Pilih Pemain Target", "Pilih nama pemain", getPlayerNames(), function(option)
-    selectedPlayer = option
+addDropdown(tab1, "Pilih Player", getPlayerNames, function(name)
+    selectedTeleportPlayer = name
 end)
 
-Section1:NewButton("Refresh Daftar Pemain", "Update nama pemain", function()
-    dropdown:Refresh(getPlayerNames())
-end)
-
-Section1:NewButton("Teleport ke Player Pilihan", "Pindah ke pemain yang dipilih", function()
-    if selectedPlayer ~= "" then
-        local target = game.Players:FindFirstChild(selectedPlayer)
+addButton(tab1, "Teleport ke Target 📍", function()
+    if selectedTeleportPlayer ~= "" then
+        local target = Players:FindFirstChild(selectedTeleportPlayer)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+            LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
         end
     end
 end)
 
-local autoTeleportEnabled = false
-local maxRadius = 100
-
-local function getClosestPlayer()
-    local localPlayer = game.Players.LocalPlayer
-    if not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return nil end
-    
-    local myPos = localPlayer.Character.HumanoidRootPart.Position
-    local closestPlayer = nil
-    local shortestDistance = maxRadius
-
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPos = player.Character.HumanoidRootPart.Position
-            local distance = (myPos - targetPos).Magnitude
-            
-            if distance <= shortestDistance then
-                shortestDistance = distance
-                closestPlayer = player
-            end
-        end
-    end
-    return closestPlayer
-end
-
-local slider1 = Section1:NewSlider("Radius Teleport Terdekat", "Batas jarak pemain", 500, 10, function(value)
-    maxRadius = value
+local autoTpRadius = 100
+addSlider(tab1, "Radius Auto TP", 10, 500, 100, function(val)
+    autoTpRadius = val
 end)
-preventSliderDrag(slider1)
 
-Section1:NewToggle("Auto Teleport Terdekat", "Teleport otomatis ke yang terdekat", function(state)
-    autoTeleportEnabled = state
+local autoTpActive = false
+addToggle(tab1, "Auto Teleport Terdekat", false, function(state)
+    autoTpActive = state
     task.spawn(function()
-        while autoTeleportEnabled do
-            local target = getClosestPlayer()
-            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+        while autoTpActive do
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+                local closest = nil
+                local dist = autoTpRadius
+
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        local d = (myPos - p.Character.HumanoidRootPart.Position).Magnitude
+                        if d <= dist then
+                            dist = d
+                            closest = p
+                        end
+                    end
+                end
+
+                if closest and closest.Character and closest.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = closest.Character.HumanoidRootPart.CFrame
+                end
             end
             task.wait(0.5)
         end
     end)
 end)
 
--- 4. Tab Fitur Utama (ESP, Fly, Bypass) 📁
-local Tab2 = Window:NewTab("Fitur 🛠️")
-local Section2 = Tab2:NewSection("ESP, Fly & Bypass")
+-- TAB 2: FITUR 🛠️
+local tab2 = createTab("Fitur 🛠️")
 
-local espEnabled = false
-Section2:NewToggle("ESP Player", "Melihat posisi player lain", function(state)
-    espEnabled = state
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= game.Players.LocalPlayer and player.Character then
-            if espEnabled then
-                if not player.Character:FindFirstChild("HighlightESP") then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "HighlightESP"
-                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    highlight.Parent = player.Character
+local espActive = false
+addToggle(tab2, "ESP Highlight Player", false, function(state)
+    espActive = state
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            if espActive then
+                if not p.Character:FindFirstChild("ESP_Highlight") then
+                    local hl = Instance.new("Highlight")
+                    hl.Name = "ESP_Highlight"
+                    hl.FillColor = Color3.fromRGB(255, 0, 0)
+                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    hl.Parent = p.Character
                 end
             else
-                if player.Character:FindFirstChild("HighlightESP") then
-                    player.Character.HighlightESP:Destroy()
+                if p.Character:FindFirstChild("ESP_Highlight") then
+                    p.Character.ESP_Highlight:Destroy()
                 end
             end
         end
     end
 end)
 
-local flying = false
 local flySpeed = 50
-
-local slider2 = Section2:NewSlider("Kecepatan Terbang", "Atur speed fly", 200, 10, function(value)
-    flySpeed = value
+addSlider(tab2, "Kecepatan Fly", 10, 200, 50, function(val)
+    flySpeed = val
 end)
-preventSliderDrag(slider2)
 
-Section2:NewToggle("Fly (Terbang)", "Mengaktifkan mode terbang", function(state)
-    flying = state
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:FindFirstChild("HumanoidRootPart")
+local flyActive = false
+addToggle(tab2, "Fly (Terbang)", false, function(state)
+    flyActive = state
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
 
-    if flying and hrp then
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Name = "FlyVelocity"
-        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.Parent = hrp
+    if flyActive and hrp then
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "FlyBV"
+        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        bv.Velocity = Vector3.new(0, 0, 0)
+        bv.Parent = hrp
 
         task.spawn(function()
-            while flying and hrp:FindFirstChild("FlyVelocity") do
+            while flyActive and hrp:FindFirstChild("FlyBV") do
                 local camCFrame = workspace.CurrentCamera.CFrame
-                hrp.FlyVelocity.Velocity = camCFrame.LookVector * flySpeed
+                hrp.FlyBV.Velocity = camCFrame.LookVector * flySpeed
                 task.wait()
             end
-            if hrp:FindFirstChild("FlyVelocity") then
-                hrp.FlyVelocity:Destroy()
+            if hrp:FindFirstChild("FlyBV") then
+                hrp.FlyBV:Destroy()
             end
         end)
     else
-        if hrp and hrp:FindFirstChild("FlyVelocity") then
-            hrp.FlyVelocity:Destroy()
+        if hrp and hrp:FindFirstChild("FlyBV") then
+            hrp.FlyBV:Destroy()
         end
     end
 end)
 
-local noclipEnabled = false
-Section2:NewToggle("Bypass Kunci/Penghalang Rumah", "Bisa menembus pintu & dinding rumah", function(state)
-    noclipEnabled = state
+local noclipActive = false
+addToggle(tab2, "Bypass Noclip (Penghalang)", false, function(state)
+    noclipActive = state
 end)
 
-game:GetService("RunService").Stepped:Connect(function()
-    if noclipEnabled and game.Players.LocalPlayer.Character then
-        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+RunService.Stepped:Connect(function()
+    if noclipActive and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide then
                 part.CanCollide = false
             end
@@ -240,42 +502,32 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
--- 5. Tab Fitur Troll Player & Mobil (Target Spesifik & Radius) 🎭
-local Tab3 = Window:NewTab("Troll 🎭")
-local Section3 = Tab3:NewSection("Pengaturan Target Troll")
+-- TAB 3: TROLL 🎭
+local tab3 = createTab("Troll 🎭")
+local selectedTrollTarget = ""
 
-local trollTarget = ""
-
-local trollDropdown = Section3:NewDropdown("Pilih Target Spesifik", "Pilih pemain target", getPlayerNames(), function(option)
-    trollTarget = option
+addDropdown(tab3, "Pilih Target Troll", getPlayerNames, function(name)
+    selectedTrollTarget = name
 end)
 
-Section3:NewButton("Refresh Target", "Update daftar nama", function()
-    trollDropdown:Refresh(getPlayerNames())
-end)
-
-Section3:NewButton("Blink Ke Target ⚡", "Teleport instan ke belakang target", function()
-    if trollTarget ~= "" then
-        local target = game.Players:FindFirstChild(trollTarget)
+addButton(tab3, "Blink ke Target ⚡", function()
+    if selectedTrollTarget ~= "" then
+        local target = Players:FindFirstChild(selectedTrollTarget)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            local targetHRP = target.Character.HumanoidRootPart
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+            LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
         end
     end
 end)
 
-local SectionTarget = Tab3:NewSection("Troll Pemain Terpilih")
-
-local spinSelectedPlayer = false
-SectionTarget:NewToggle("Spin Player Terpilih 🌀", "Memutar target dari dropdown", function(state)
-    spinSelectedPlayer = state
+local spinTargetActive = false
+addToggle(tab3, "Spin Player Terpilih 🌀", false, function(state)
+    spinTargetActive = state
     task.spawn(function()
-        while spinSelectedPlayer do
-            if trollTarget ~= "" then
-                local target = game.Players:FindFirstChild(trollTarget)
+        while spinTargetActive do
+            if selectedTrollTarget ~= "" then
+                local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = target.Character.HumanoidRootPart
-                    hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(45), 0)
+                    target.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(45), 0)
                 end
             end
             task.wait(0.05)
@@ -283,18 +535,17 @@ SectionTarget:NewToggle("Spin Player Terpilih 🌀", "Memutar target dari dropdo
     end)
 end)
 
-local spinSelectedCar = false
-SectionTarget:NewToggle("Spin Mobil Player Terpilih 🏎️", "Memutar mobil target dari dropdown", function(state)
-    spinSelectedCar = state
+local spinCarActive = false
+addToggle(tab3, "Spin Mobil Target 🏎️", false, function(state)
+    spinCarActive = state
     task.spawn(function()
-        while spinSelectedCar do
-            if trollTarget ~= "" then
-                local target = game.Players:FindFirstChild(trollTarget)
+        while spinCarActive do
+            if selectedTrollTarget ~= "" then
+                local target = Players:FindFirstChild(selectedTrollTarget)
                 if target and target.Character then
-                    local humanoid = target.Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid and humanoid.SeatPart and humanoid.SeatPart:IsA("VehicleSeat") then
-                        local carPart = humanoid.SeatPart
-                        carPart.CFrame = carPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
+                    local hum = target.Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.SeatPart and hum.SeatPart:IsA("VehicleSeat") then
+                        hum.SeatPart.CFrame = hum.SeatPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
                     end
                 end
             end
@@ -303,28 +554,23 @@ SectionTarget:NewToggle("Spin Mobil Player Terpilih 🏎️", "Memutar mobil tar
     end)
 end)
 
-local SectionRadius = Tab3:NewSection("Troll Radius Area (Otomatis)")
-
-local spinRadiusValue = 50
-
-local slider3 = SectionRadius:NewSlider("Radius Area Troll 📏", "Jarak jangkauan area", 200, 10, function(value)
-    spinRadiusValue = value
+local trollRadius = 50
+addSlider(tab3, "Radius Troll Area", 10, 200, 50, function(val)
+    trollRadius = val
 end)
-preventSliderDrag(slider3)
 
-local spinAllInRadius = false
-SectionRadius:NewToggle("Auto Spin Pemain dalam Radius 🌀", "Memutar semua pemain di sekitar", function(state)
-    spinAllInRadius = state
+local radiusSpinActive = false
+addToggle(tab3, "Auto Spin Radius Player 🌀", false, function(state)
+    radiusSpinActive = state
     task.spawn(function()
-        while spinAllInRadius do
-            local localPlayer = game.Players.LocalPlayer
-            if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local myPos = localPlayer.Character.HumanoidRootPart.Position
-                for _, player in pairs(game.Players:GetPlayers()) do
-                    if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        local targetHRP = player.Character.HumanoidRootPart
-                        if (myPos - targetHRP.Position).Magnitude <= spinRadiusValue then
-                            targetHRP.CFrame = targetHRP.CFrame * CFrame.Angles(0, math.rad(45), 0)
+        while radiusSpinActive do
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = p.Character.HumanoidRootPart
+                        if (myPos - hrp.Position).Magnitude <= trollRadius then
+                            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(45), 0)
                         end
                     end
                 end
@@ -334,83 +580,43 @@ SectionRadius:NewToggle("Auto Spin Pemain dalam Radius 🌀", "Memutar semua pem
     end)
 end)
 
-local spinCarsInRadius = false
-SectionRadius:NewToggle("Auto Spin Mobil dalam Radius 🏎️", "Memutar semua mobil di sekitar", function(state)
-    spinCarsInRadius = state
-    task.spawn(function()
-        while spinCarsInRadius do
-            local localPlayer = game.Players.LocalPlayer
-            if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local myPos = localPlayer.Character.HumanoidRootPart.Position
-                for _, player in pairs(game.Players:GetPlayers()) do
-                    if player ~= localPlayer and player.Character then
-                        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-                        if humanoid and humanoid.SeatPart and humanoid.SeatPart:IsA("VehicleSeat") then
-                            local carPart = humanoid.SeatPart
-                            if (myPos - carPart.Position).Magnitude <= spinRadiusValue then
-                                carPart.CFrame = carPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
-                            end
-                        end
-                    end
-                end
-            end
-            task.wait(0.05)
-        end
-    end)
+-- TAB 4: SETTING ⚙️
+local tab4 = createTab("Setting ⚙️")
+
+addSlider(tab4, "Transparansi UI", 0, 100, 0, function(val)
+    local alpha = val / 100
+    MainFrame.BackgroundTransparency = alpha
+    Header.BackgroundTransparency = alpha
+    TabBar.BackgroundTransparency = alpha
 end)
 
--- 6. Tab Setting UI (Tema Warna Penuh & Transparansi) ⚙️
-local Tab4 = Window:NewTab("Setting ⚙️")
-local SectionSetting = Tab4:NewSection("Kustomisasi Layar UI")
-
--- Transparansi Background 🪟
-local slider4 = SectionSetting:NewSlider("Transparansi UI 🪟", "Atur tingkat transparan layar (0-100%)", 100, 0, function(value)
-    if mainFrame then
-        mainFrame.BackgroundTransparency = value / 100
-        for _, obj in pairs(mainFrame:GetDescendants()) do
-            if obj:IsA("Frame") or obj:IsA("TextLabel") or obj:IsA("TextButton") then
-                obj.BackgroundTransparency = math.clamp((value / 100), 0, 0.8)
-            end
+addButton(tab4, "Tema Hitam 🖤", function()
+    isRgbActive = false
+    for _, elem in pairs(rgbElements) do
+        if elem:IsA("GuiObject") then
+            elem.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         end
     end
 end)
-preventSliderDrag(slider4)
 
--- Fungsi Mengubah Warna Seluruh Elemen Anak UI 🎨
-local function setFullThemeColor(color)
-    if mainFrame then
-        mainFrame.BackgroundColor3 = color
-        for _, obj in pairs(mainFrame:GetDescendants()) do
-            if obj:IsA("GuiObject") and not obj:IsA("TextButton") then
-                obj.BackgroundColor3 = color
-            end
+addButton(tab4, "Tema Putih 🤍", function()
+    isRgbActive = false
+    for _, elem in pairs(rgbElements) do
+        if elem:IsA("GuiObject") then
+            elem.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
         end
     end
-end
-
-SectionSetting:NewButton("Tema Hitam 🖤", "Mengubah background ke warna hitam", function()
-    setFullThemeColor(Color3.fromRGB(20, 20, 20))
 end)
 
-SectionSetting:NewButton("Tema Putih 🤍", "Mengubah background ke warna putih", function()
-    setFullThemeColor(Color3.fromRGB(240, 240, 240))
-end)
-
-local rgbEnabled = false
-SectionSetting:NewToggle("Tema Pelangi RGB Penuh 🌈", "Animasi warna pelangi di seluruh layar UI", function(state)
-    rgbEnabled = state
+addToggle(tab4, "Tema Pelangi RGB Penuh 🌈", false, function(state)
+    isRgbActive = state
     task.spawn(function()
-        while rgbEnabled do
-            if mainFrame then
-                local hue = (tick() % 5) / 5
-                local rainbowColor = Color3.fromHSV(hue, 0.8, 0.8)
-                mainFrame.BackgroundColor3 = rainbowColor
-                
-                -- Mengubah seluruh komponen anak UI agar RGB Penuh 🌈
-                for _, obj in pairs(mainFrame:GetDescendants()) do
-                    if obj:IsA("GuiObject") and not obj:IsA("TextButton") then
-                        obj.BackgroundColor3 = rainbowColor
-                    end
+        while isRgbActive do
+            local hue = (tick() % 4) / 4
+            local rainbowColor = Color3.fromHSV(hue, 0.75, 0.8)
+            for _, elem in pairs(rgbElements) do
+                if elem and elem:IsA("GuiObject") then
+                    elem.BackgroundColor3 = rainbowColor
                 end
             end
             task.wait(0.03)
