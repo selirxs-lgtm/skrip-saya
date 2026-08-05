@@ -1,17 +1,17 @@
 -- ========================================================
--- CUSTOM SCRIPT: Steal a Brainrot [Overhauled & Pro Features]
+-- CUSTOM SCRIPT: Steal a Brainrot [Ultimate Bypass & Noclip Edition]
 -- ========================================================
 
--- 1. Bersihkan sisa script lama agar tidak bentrok
 pcall(function()
     local lp = game:GetService("Players").LocalPlayer
     if lp and lp:FindFirstChild("PlayerGui") then
-        if lp.PlayerGui:FindFirstChild("BrainrotUltimateHub") then
-            lp.PlayerGui.BrainrotUltimateHub:Destroy()
+        if lp.PlayerGui:FindFirstChild("BrainrotGodHub") then
+            lp.PlayerGui.BrainrotGodHub:Destroy()
         end
     end
-    if _G.AutoCollectThread then task.cancel(_G.AutoCollectThread) end
-    if _G.ESPThread then task.cancel(_G.ESPThread) end
+    if _G.StealLoop then task.cancel(_G.StealLoop) end
+    if _G.SpeedLoop then task.cancel(_G.SpeedLoop) end
+    if _G.NoclipConn then _G.NoclipConn:Disconnect() end
     collectgarbage("collect")
 end)
 
@@ -22,18 +22,18 @@ end
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
--- Notifikasi Berhasil Load
+-- Notifikasi
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Brainrot Ultimate Hub",
-    Text = "Script berhasil diperbarui dengan Auto Collect Pintar!",
+    Title = "Brainrot God Hub",
+    Text = "Mode Noclip & Steal Aktif!",
     Duration = 3
 })
 
 -- ========================================================
--- 2. PEMBUATAN UI PROFESIONAL & TOMBOL CLOSE
+-- UI UTAMA
 -- ========================================================
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
@@ -43,16 +43,16 @@ local CloseButton = Instance.new("TextButton")
 local ContentContainer = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
 
-ScreenGui.Name = "BrainrotUltimateHub"
+ScreenGui.Name = "BrainrotGodHub"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -180)
-MainFrame.Size = UDim2.new(0, 300, 0, 360)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -190)
+MainFrame.Size = UDim2.new(0, 300, 0, 380)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -60,10 +60,9 @@ local UICornerMain = Instance.new("UICorner")
 UICornerMain.CornerRadius = UDim.new(0, 10)
 UICornerMain.Parent = MainFrame
 
--- Top Bar
 TopBar.Name = "TopBar"
 TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 
 local UICornerTop = Instance.new("UICorner")
@@ -75,15 +74,14 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0.05, 0, 0, 0)
 Title.Size = UDim2.new(0.7, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "Steal a Brainrot [Ultimate]"
+Title.Text = "Steal a Brainrot [God Mode]"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol Close (X)
 CloseButton.Name = "CloseButton"
 CloseButton.Parent = TopBar
-CloseButton.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
+CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
 CloseButton.Position = UDim2.new(1, -35, 0.5, -12)
 CloseButton.Size = UDim2.new(0, 24, 0, 24)
 CloseButton.Font = Enum.Font.GothamBold
@@ -97,28 +95,27 @@ UICornerClose.Parent = CloseButton
 
 CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
-    if _G.AutoCollectThread then task.cancel(_G.AutoCollectThread) end
-    if _G.ESPThread then task.cancel(_G.ESPThread) end
+    if _G.StealLoop then task.cancel(_G.StealLoop) end
+    if _G.SpeedLoop then task.cancel(_G.SpeedLoop) end
+    if _G.NoclipConn then _G.NoclipConn:Disconnect() end
 end)
 
--- Container Scrollable untuk Tombol
 ContentContainer.Name = "ContentContainer"
 ContentContainer.Parent = MainFrame
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.Position = UDim2.new(0, 10, 0, 55)
 ContentContainer.Size = UDim2.new(1, -20, 1, -65)
-ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 420)
+ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 450)
 ContentContainer.ScrollBarThickness = 4
 
 UIListLayout.Parent = ContentContainer
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 8)
 
--- Fungsi Pembuat Tombol Universal
 local function CreateButton(name, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = ContentContainer
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
     btn.Size = UDim2.new(1, 0, 0, 40)
     btn.Font = Enum.Font.GothamSemibold
     btn.Text = name .. " [ OFF ]"
@@ -135,91 +132,99 @@ local function CreateButton(name, callback)
         if state then
             btn.Text = name .. " [ ON ]"
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
+            btn.BackgroundColor3 = Color3.fromRGB(0, 170, 90)
         else
             btn.Text = name .. " [ OFF ]"
             btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
         end
         callback(state)
     end)
 end
 
 -- ========================================================
--- 3. FITUR-FITUR UTAMA BARU (DIPERKUAT)
+-- FITUR SAKTI
 -- ========================================================
 
--- FITUR 1: Auto Collect Pintar (Teleport ke item atau Paksa Ambil)
-CreateButton("Auto Collect (Smart)", function(enabled)
+-- 1. FITUR WALLHACK / NOCLIP (Tembus Tembok Markas Orang)
+CreateButton("Wallhack / Noclip (Tembus Markas)", function(enabled)
     if enabled then
-        _G.AutoCollectThread = task.spawn(function()
+        _G.NoclipConn = RunService.Stepped:Connect(function()
+            pcall(function()
+                if LocalPlayer.Character then
+                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        end)
+    else
+        if _G.NoclipConn then
+            _G.NoclipConn:Disconnect()
+            _G.NoclipConn = nil
+        end
+    end
+end)
+
+-- 2. FITUR TELEPORT / TARIK ANOMALI & BRAINROT (Auto Steal)
+CreateButton("Auto Steal / Teleport Item", function(enabled)
+    if enabled then
+        _G.StealLoop = task.spawn(function()
             while true do
                 pcall(function()
                     local char = LocalPlayer.Character
                     if char and char:FindFirstChild("HumanoidRootPart") then
                         local hrp = char.HumanoidRootPart
-                        
-                        -- Cari semua objek di Workspace yang berpotensi item/koin/drop
+                        -- Menyisir seluruh map untuk mencari objek/anomali/brainrot
                         for _, obj in pairs(Workspace:GetDescendants()) do
-                            if obj:IsA("BasePart") then
-                                local name = obj.Name:lower()
-                                -- Cek apakah part tersebut adalah item, koin, gift, atau memiliki touch interest
-                                if name:find("coin") or name:find("item") or name:find("drop") or name:find("cash") or obj:FindFirstChild("TouchInterest") then
-                                    -- Cara paksa 1: Pindahkan posisi karakter sebentar ke item (Magnet-like) atau sentuh langsung
-                                    firetouchinterest(hrp, obj, 0)
-                                    task.wait(0.05)
-                                    firetouchinterest(hrp, hrp, 1)
+                            if obj:IsA("Model") and (obj.Name:lower():find("brainrot") or obj.Name:lower():find("anomali") or obj.Name:lower():find("item") or obj:FindFirstChild("PrimaryPart")) then
+                                local targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                if targetPart then
+                                    -- Teleportasi posisi objek ke depan kita atau sentuh paksa
+                                    firetouchinterest(hrp, targetPart, 0)
+                                    task.wait(0.02)
+                                    firetouchinterest(hrp, targetPart, 1)
                                 end
                             end
                         end
                     end
                 end)
-                task.wait(0.3) -- Jeda cepat tapi aman
+                task.wait(0.5)
             end
         end)
     else
-        if _G.AutoCollectThread then
-            task.cancel(_G.AutoCollectThread)
-            _G.AutoCollectThread = nil
+        if _G.StealLoop then
+            task.cancel(_G.StealLoop)
+            _G.StealLoop = nil
         end
     end
 end)
 
--- FITUR 2: Speed Hack (Lari Cepat 50)
-local speedConn
-CreateButton("Speed Hack (50)", function(enabled)
+-- 3. SPEED HACK BYPASS (CFrame Based - Dijamin Jalan)
+CreateButton("Speed Hack (CFrame Speed)", function(enabled)
     if enabled then
-        speedConn = RunService.RenderStepped:Connect(function()
+        _G.SpeedLoop = RunService.RenderStepped:Connect(function(dt)
             pcall(function()
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                    LocalPlayer.Character.Humanoid.WalkSpeed = 50
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+                    local hum = char.Humanoid
+                    if hum.MoveDirection.Magnitude > 0 then
+                        char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + (hum.MoveDirection * 0.8)
+                    end
                 end
             end)
         end)
     else
-        if speedConn then speedConn:Disconnect() end
-        pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = 16 end)
+        if _G.SpeedLoop then
+            _G.SpeedLoop:Disconnect()
+            _G.SpeedLoop = nil
+        end
     end
 end)
 
--- FITUR 3: Jump Power Tinggi (Loncat Tinggi)
-local jumpConn
-CreateButton("Super Jump", function(enabled)
-    if enabled then
-        jumpConn = RunService.RenderStepped:Connect(function()
-            pcall(function()
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                    LocalPlayer.Character.Humanoid.JumpPower = 100
-                end
-            end)
-        end)
-    else
-        if jumpConn then jumpConn:Disconnect() end
-        pcall(function() LocalPlayer.Character.Humanoid.JumpPower = 50 end)
-    end
-end)
-
--- FITUR 4: Infinite Jump (Loncat Terus di Udara)
+-- 4. INFINITE JUMP
 local infJumpConn
 CreateButton("Infinite Jump", function(enabled)
     if enabled then
@@ -235,21 +240,7 @@ CreateButton("Infinite Jump", function(enabled)
     end
 end)
 
--- FITUR 5: Anti AFK (Supaya Gak Ke-Kick Idle)
-CreateButton("Anti AFK", function(enabled)
-    if enabled then
-        pcall(function()
-            local vu = game:GetService("VirtualUser")
-            LocalPlayer.Idled:Connect(function()
-                vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                task.wait(1)
-                vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-            end)
-        end)
-    end
-end)
-
--- FITUR 6: Fullbright (Terangi Seluruh Map Malam Hari)
+-- 5. FULLBRIGHT
 CreateButton("Fullbright (Anti Gelap)", function(enabled)
     pcall(function()
         local Lighting = game:GetService("Lighting")
