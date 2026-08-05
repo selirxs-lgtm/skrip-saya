@@ -8,9 +8,9 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHept
 -- Buat Window Utama
 local Window = Library.CreateLib("Rafael Xiter 🚀", "DarkTheme")
 
--- Buat Tab Menu
+-- Tab Fitur Utama (Secara otomatis mendukung scrolling di Kavo UI jika kontennya banyak)
 local Tab = Window:NewTab("Fitur Utama")
-local Section = Tab:NewSection("Pilih Fitur Cheat")
+local Section = Tab:NewSection("Menu Cheat & Fitur")
 
 local godModeEnabled = false
 local noclipEnabled = false
@@ -19,7 +19,6 @@ local jumpEnabled = false
 local autoTeleportEnabled = false
 local autoKillEnabled = false
 
--- Tombol Toggle Kavo UI
 Section:NewToggle("Unlimited Health", "Membuat darah penuh terus", function(state)
     godModeEnabled = state
 end)
@@ -44,7 +43,18 @@ Section:NewToggle("Super Jump", "Loncat tinggi banget", function(state)
     jumpEnabled = state
 end)
 
--- Eksekusi Fitur di Background (RenderStepped)
+-- Tambahan Tab Setting / Credit buat meramaikan menu scroll
+local SettingTab = Window:NewTab("Pengaturan")
+local SettingSection = SettingTab:NewSection("Kontrol Menu")
+
+SettingSection:NewButton("Buka/Tutup Menu", "Klik untuk toggle UI", function()
+    Library:ToggleUI()
+end)
+
+SettingSection:NewLabel("Status: Berjalan Normal")
+SettingSection:NewLabel("Author: Rafael Xiter")
+
+-- Eksekusi Fitur di Background
 RunService.RenderStepped:Connect(function()
     if godModeEnabled and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
