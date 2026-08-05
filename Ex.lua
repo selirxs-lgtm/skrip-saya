@@ -91,7 +91,7 @@ HeaderCorner.CornerRadius = UDim.new(0, 12)
 HeaderCorner.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -45, 1, 0)
+Title.Size = UDim2.new(1, -70, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "Rafael xiter"
@@ -101,18 +101,19 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Header
 
+-- Tombol Close Aman (Teks Jelas & Lebar Pas)
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 28, 0, 28)
-CloseButton.Position = UDim2.new(1, -36, 0, 8)
+CloseButton.Size = UDim2.new(0, 50, 0, 28)
+CloseButton.Position = UDim2.new(1, -58, 0, 8)
 CloseButton.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
-CloseButton.Text = "✕"
+CloseButton.Text = "TUTUP"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 12
+CloseButton.TextSize = 10
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Parent = Header
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.CornerRadius = UDim.new(0, 6)
 CloseCorner.Parent = CloseButton
 
 local ScrollingFrame = Instance.new("ScrollingFrame")
@@ -164,11 +165,12 @@ local ToggleNoclip = createButton(8, "WALLHACK (NOCLIP)")
 local ToggleSpeed = createButton(9, "SUPER SPEED (EXTREME)")
 local ToggleJump = createButton(10, "SUPER JUMP")
 
+-- Tombol Open Floating Aman
 local OpenButton = Instance.new("TextButton")
-OpenButton.Size = UDim2.new(0, 110, 0, 35)
+OpenButton.Size = UDim2.new(0, 120, 0, 38)
 OpenButton.Position = UDim2.new(0, 15, 0, 15)
 OpenButton.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
-OpenButton.Text = "⚡ OPEN MENU"
+OpenButton.Text = "⚡ BUKA RAFAEL"
 OpenButton.TextColor3 = Color3.fromRGB(15, 15, 20)
 OpenButton.TextSize = 11
 OpenButton.Font = Enum.Font.GothamBold
