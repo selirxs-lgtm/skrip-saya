@@ -1,5 +1,5 @@
 -- ==========================================
--- RAFAEL XITER 🚀 - ULTIMATE MOBILE GUI (V3 FULL)
+-- RAFAEL XITER 🚀 - ULTIMATE MOBILE GUI (V4 MEGA FULL)
 -- ==========================================
 
 local UserInputService = game:GetService("UserInputService")
@@ -81,9 +81,9 @@ TitleLabel.BackgroundTransparency = 1
 TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.Size = UDim2.new(1, -24, 1, 0)
 TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Text = "Rafael Xiter 🚀"
+TitleLabel.Text = "Rafael Xiter 🚀 [MEGA]"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 18
+TitleLabel.TextSize = 16
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.ZIndex = 3
 
@@ -122,12 +122,13 @@ local function createTab(name)
     local tabBtn = Instance.new("TextButton")
     tabBtn.Parent = TabBar
     tabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    tabBtn.Size = UDim2.new(0.25, -2, 1, 0)
-    tabBtn.Position = UDim2.new(0.25 * tabCount, 1, 0, 0)
+    -- Karena ada 5 tab, lebar dibagi 5 (0.2)
+    tabBtn.Size = UDim2.new(0.2, -1, 1, 0)
+    tabBtn.Position = UDim2.new(0.2 * tabCount, 0, 0, 0)
     tabBtn.Font = Enum.Font.SourceSansBold
     tabBtn.Text = name
     tabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    tabBtn.TextSize = 10
+    tabBtn.TextSize = 9
     tabBtn.ZIndex = 3
 
     local scroll = Instance.new("ScrollingFrame")
@@ -387,7 +388,7 @@ local function getPlayerNames()
 end
 
 -- ==========================================
--- 5. MEMBUAT TAB & FITUR-FITUR
+-- 5. MEMBUAT 5 TAB & PULUHAN FITUR BERSERAKAN
 -- ==========================================
 
 -- TAB 1: TELEPORT 📍
@@ -910,7 +911,7 @@ end)
 
 
 -- TAB 4: FUN & VISUAL ✨
-local tab4 = createTab("Fun & Visual ✨")
+local tab4 = createTab("Fun & Vis 🎨")
 
 local fullbrightActive = false
 addToggle(tab4, "FullBright (Anti Gelap) ☀️", false, function(state)
@@ -975,6 +976,185 @@ addToggle(tab4, "Spin Karakter Sendiri 🌪️", false, function(state)
             task.wait(0.03)
         end
     end)
+end)
+
+
+-- TAB 5: TAMBAHAN 15 FITUR BARU BARBAR 🔥 (Eksklusif Tab Extra)
+local tab5 = createTab("Extra 15+ 🧨")
+
+-- [FITUR TAMBAHAN 1] Infinite Yield / Auto Reset Karakter Cepat
+addButton(tab5, "Reset Karakter Instan 💀", function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character.Humanoid.Health = 0
+    end
+end)
+
+-- [FITUR TAMBAHAN 2] Anti Ragdoll / Kebal Rebahan
+local antiRagdollActive = false
+addToggle(tab5, "Anti Ragdoll / Kebal Jatuh 🦾", false, function(state)
+    antiRagdollActive = state
+    task.spawn(function()
+        while antiRagdollActive do
+            if LocalPlayer.Character then
+                local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.PlatformStand = false
+                end
+            end
+            task.wait(0.2)
+        end
+    end)
+end)
+
+-- [FITUR TAMBAHAN 3] Auto Clicker / Spam Tap Kiri Terus Menerus
+local autoClickActive = false
+addToggle(tab5, "Auto Clicker Mouse/Tap 🖱️", false, function(state)
+    autoClickActive = state
+    task.spawn(function()
+        while autoClickActive do
+            vim = game:GetService("VirtualInputManager")
+            vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+            vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+            task.wait(0.05)
+        end
+    end)
+end)
+
+-- [FITUR TAMBAHAN 4] Hapus Semua Fog / Kabut Biar Jauh
+addButton(tab5, "Hapus Kabut Map (Clear Fog) 🌤️", function()
+    Lighting.FogEnd = 999999
+    for _, v in pairs(Lighting:GetChildren()) do
+        if v:IsA("Atmosphere") or v:IsA("Sky") then
+            -- Biarkan sky, hapus atau kurangi atmosphere
+            v.Density = 0
+        end
+    end
+end)
+
+-- [FITUR TAMBAHAN 5] Ubah Waktu Jadi Malam Total
+addButton(tab5, "Set Waktu Malam (Midnight) 🌙", function()
+    Lighting.ClockTime = 0
+end)
+
+-- [FITUR TAMBAHAN 6] Ubah Waktu Jadi Siang Bolong
+addButton(tab5, "Set Waktu Siang (Noon) ☀️", function()
+    Lighting.ClockTime = 12
+end)
+
+-- [FITUR TAMBAHAN 7] Bunuh Diri Massal Semua Player Lain (Jika game mendukung)
+addButton(tab5, "Auto Bunuh Semua (Server Troll) 💥", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                p.Character:BreakJoints()
+            end
+        end
+    end
+end)
+
+-- [FITUR TAMBAHAN 8] Ubah Ukuran Kepala Karakter (Scale Head)
+addSlider(tab5, "Ukuran Kepala (Head Size)", 1, 15, 1, function(val)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
+        LocalPlayer.Character.Head.Size = Vector3.new(val, val, val)
+    end
+end)
+
+-- [FITUR TAMBAHAN 9] Auto Hapus Tool Orang Lain di Sekitar
+local removeToolsActive = false
+addToggle(tab5, "Anti-Tool / Hapus Item Jatuh 🧹", false, function(state)
+    removeToolsActive = state
+    task.spawn(function()
+        while removeToolsActive do
+            for _, obj in pairs(workspace:GetChildren()) do
+                if obj:IsA("BackpackItem") or obj:IsA("Tool") then
+                    if obj.Parent == workspace then
+                        obj:Destroy()
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end)
+
+-- [FITUR TAMBAHAN 10] Super High Jump (Loncat Tinggi Sekali Tekan)
+local superJumpActive = false
+addToggle(tab5, "Super High Jump Mode 🚀", false, function(state)
+    superJumpActive = state
+    if LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.JumpPower = superJumpActive and 250 or 50
+        end
+    end
+end)
+
+-- [FITUR TAMBAHAN 11] Ubah Kecepatan Game (Game Speed / CFrame Hack)
+addSlider(tab5, "Kecepatan Game (Multiplier)", 1, 5, 1, function(val)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 16 * val
+    end
+end)
+
+-- [FITUR TAMBAHAN 12] Sembunyikan Nama Sendiri (Hide Overhead Name)
+addButton(tab5, "Sembunyikan Nama Sendiri 🙈", function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
+        for _, v in pairs(LocalPlayer.Character.Head:GetChildren()) do
+            if v:IsA("BillboardGui") then
+                v.Enabled = false
+            end
+        end
+    end
+end)
+
+-- [FITUR TAMBAHAN 13] Tembus Tembok Manual (Noclip Toggle Cepat)
+local quickNoclip = false
+addToggle(tab5, "Quick Noclip Wall 🧱", false, function(state)
+    quickNoclip = state
+end)
+RunService.Stepped:Connect(function()
+    if quickNoclip and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- [FITUR TAMBAHAN 14] Jumpscare Efek Layar Kedip Merah
+local flashingActive = false
+addToggle(tab5, "Screen Flash Red Effect 🚨", false, function(state)
+    flashingActive = state
+    task.spawn(function()
+        local gui = CoreGui:FindFirstChild("RafaelXiterUI")
+        if not gui then return end
+        local flashFrame = gui:FindFirstChild("RedFlash")
+        if not flashFrame and flashingActive then
+            flashFrame = Instance.new("Frame")
+            flashFrame.Name = "RedFlash"
+            flashFrame.Size = UDim2.new(1, 0, 1, 0)
+            flashFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            flashFrame.BackgroundTransparency = 0.8
+            flashFrame.ZIndex = 999
+            flashFrame.Parent = gui
+        end
+        while flashingActive do
+            if flashFrame then flashFrame.Visible = true end
+            task.wait(0.1)
+            if flashFrame then flashFrame.Visible = false end
+            task.wait(0.3)
+        end
+        if flashFrame then flashFrame:Destroy() end
+    end)
+end)
+
+-- [FITUR TAMBAHAN 15] Hancurkan/Hapus UI Permanen
+addButton(tab5, "Hancurkan GUI Ini (Destroy) ❌", function()
+    if CoreGui:FindFirstChild("RafaelXiterUI") then
+        CoreGui.RafaelXiterUI:Destroy()
+    end
 end)
 
 
