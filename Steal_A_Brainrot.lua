@@ -1,11 +1,14 @@
 -- ========================================================
--- CUSTOM SCRIPT: Steal a Brainrot (Full Features + Anti-Ban)
+-- CUSTOM SCRIPT: Steal a Brainrot (Fixed UI & Safe)
 -- ========================================================
 
--- 1. BAGIAN ANTI-NYANGKUT (CLEANUP CACHE LAMA)
+-- 1. Bersihkan sisa script lama agar tidak bentrok
 pcall(function()
-    if game.CoreGui:FindFirstChild("StealABrainrotHub") then
-        game.CoreGui.StealABrainrotHub:Destroy()
+    local lp = game:GetService("Players").LocalPlayer
+    if lp and lp:FindFirstChild("PlayerGui") then
+        if lp.PlayerGui:FindFirstChild("StealABrainrotHub") then
+            lp.PlayerGui.StealABrainrotHub:Destroy()
+        end
     end
     if _G.BrainrotLoopConnection then
         task.cancel(_G.BrainrotLoopConnection)
@@ -18,46 +21,21 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
--- 2. ANTI-CHEAT BYPASS & SAFETY
-pcall(function()
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    
-    local mt = getrawmetatable(game)
-    if mt then
-        setreadonly(mt, false)
-        local oldNamecall = mt.__namecall
-        mt.__namecall = newcclosure(function(self, ...)
-            local method = getnamecallmethod()
-            if method == "Kick" or method == "kick" then
-                if self == LocalPlayer then
-                    warn("Anti-Ban: Percobaan kick dari server diblokir!")
-                    return
-                end
-            end
-            return oldNamecall(self, ...)
-        end)
-        setreadonly(mt, true)
-    end
-end)
-
 -- Variabel Utama
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 
--- Notifikasi Berhasil Load
+-- Notifikasi Tanda Berhasil
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Steal A Brainrot [Pro Hub]",
-    Text = "Script berhasil dimuat dengan fitur lengkap!",
-    Duration = 4
+    Title = "Brainrot Hub",
+    Text = "Script berhasil dimuat ke PlayerGui!",
+    Duration = 3
 })
 
 -- ========================================================
--- 3. KUMPULAN FITUR UTAMA
+-- FUNGSI FITUR
 -- ========================================================
-
--- Fitur 1: Auto Collect Item
 local function AutoCollect()
     pcall(function()
         for _, item in pairs(Workspace:GetChildren()) do
@@ -70,18 +48,8 @@ local function AutoCollect()
     end)
 end
 
--- Fitur 2: Anti AFK
-pcall(function()
-    local vu = game:GetService("VirtualUser")
-    LocalPlayer.Idled:Connect(function()
-        vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    end)
-end)
-
 -- ========================================================
--- 4. PEMBUATAN USER INTERFACE (GUI MULTI-FITUR)
+-- PEMBUATAN UI (Dipindah ke PlayerGui agar pasti muncul)
 -- ========================================================
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
@@ -89,8 +57,10 @@ local Title = Instance.new("TextLabel")
 local UIListLayout = Instance.new("UIListLayout")
 
 ScreenGui.Name = "StealABrainrotHub"
-ScreenGui.Parent = game.CoreGui
+-- Menggunakan PlayerGui agar tembus di semua executor
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
@@ -105,7 +75,7 @@ Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.Font = Enum.Font.SourceSansBold
-Title.Text = "Brainrot Hub [Pro Edition]"
+Title.Text = "Brainrot Hub [Fixed]"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 
@@ -113,7 +83,7 @@ UIListLayout.Parent = MainFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 5)
 
--- Fungsi Pembuat Tombol Toggle di GUI
+-- Fungsi Tombol
 local function CreateToggleButton(name, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = MainFrame
@@ -138,17 +108,13 @@ local function CreateToggleButton(name, callback)
     end)
 end
 
--- ========================================================
--- 5. MENAMBAHKAN TOMBOL FITUR KE MENU GUI
--- ========================================================
-
 -- Tombol Auto Collect
 CreateToggleButton("Auto Collect", function(enabled)
     if enabled then
         _G.AutoCollectLoop = task.spawn(function()
             while true do
                 AutoCollect()
-                task.wait(0.5) -- Jeda aman agar tidak kena ban
+                task.wait(0.5)
             end
         end)
     else
@@ -159,20 +125,20 @@ CreateToggleButton("Auto Collect", function(enabled)
     end
 end)
 
--- Tombol WalkSpeed Kencang (Contoh: Speed 50)
+-- Tombol Speed Hack
 CreateToggleButton("Speed Hack (50)", function(enabled)
     pcall(function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
             if enabled then
                 LocalPlayer.Character.Humanoid.WalkSpeed = 50
             else
-                LocalPlayer.Character.Humanoid.WalkSpeed = 16 -- Normal
+                LocalPlayer.Character.Humanoid.WalkSpeed = 16
             end
         end
     end)
 end)
 
--- Tombol Infinite Jump (Loncat Terus di Udara)
+-- Tombol Infinite Jump
 local infJumpConn
 CreateToggleButton("Infinite Jump", function(enabled)
     local UIS = game:GetService("UserInputService")
