@@ -4,7 +4,7 @@ local Window = Library.CreateLib("Rafael Xiter 🚀", "Midnight")
 
 local mainFrame = nil
 
--- Mencari Frame Utama untuk Pengaturan UI & Draggable 🔀
+-- Mencari Frame Utama & Mengatur Fungsi Draggable 🔀
 task.spawn(function()
     local coreGui = game:GetService("CoreGui")
     for _, gui in pairs(coreGui:GetChildren()) do
@@ -15,6 +15,35 @@ task.spawn(function()
         end
     end
 end)
+
+-- Fungsi Mematikan Drag UI Saat Menggunakan Slider (Khusus HP 📱)
+local function preventSliderDrag(sliderInstance)
+    task.spawn(function()
+        -- Mencari objek visual slider di dalam UI
+        local sliderGuiObject = sliderInstance
+        if typeof(sliderInstance) == "table" and sliderInstance.Instance then
+            sliderGuiObject = sliderInstance.Instance
+        end
+        
+        if typeof(sliderGuiObject) == "Instance" then
+            sliderGuiObject.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if mainFrame then
+                        mainFrame.Draggable = false -- Matikan geser menu sementara 🛑
+                    end
+                end
+            end)
+            
+            sliderGuiObject.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if mainFrame then
+                        mainFrame.Draggable = true -- Aktifkan kembali geser menu 🟢
+                    end
+                end
+            end)
+        end
+    end)
+end
 
 -- 2. Membuat Tombol Bulat Melayang (Toggle UI) 🔘
 local ToggleScreen = Instance.new("ScreenGui")
@@ -114,9 +143,10 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
-Section1:NewSlider("Radius Teleport Terdekat", "Batas jarak pemain", 500, 10, function(value)
+local slider1 = Section1:NewSlider("Radius Teleport Terdekat", "Batas jarak pemain", 500, 10, function(value)
     maxRadius = value
 end)
+preventSliderDrag(slider1)
 
 Section1:NewToggle("Auto Teleport Terdekat", "Teleport otomatis ke yang terdekat", function(state)
     autoTeleportEnabled = state
@@ -160,9 +190,10 @@ end)
 local flying = false
 local flySpeed = 50
 
-Section2:NewSlider("Kecepatan Terbang", "Atur speed fly", 200, 10, function(value)
+local slider2 = Section2:NewSlider("Kecepatan Terbang", "Atur speed fly", 200, 10, function(value)
     flySpeed = value
 end)
+preventSliderDrag(slider2)
 
 Section2:NewToggle("Fly (Terbang)", "Mengaktifkan mode terbang", function(state)
     flying = state
@@ -276,9 +307,10 @@ local SectionRadius = Tab3:NewSection("Troll Radius Area (Otomatis)")
 
 local spinRadiusValue = 50
 
-SectionRadius:NewSlider("Radius Area Troll 📏", "Jarak jangkauan area", 200, 10, function(value)
+local slider3 = SectionRadius:NewSlider("Radius Area Troll 📏", "Jarak jangkauan area", 200, 10, function(value)
     spinRadiusValue = value
 end)
+preventSliderDrag(slider3)
 
 local spinAllInRadius = false
 SectionRadius:NewToggle("Auto Spin Pemain dalam Radius 🌀", "Memutar semua pemain di sekitar", function(state)
@@ -327,38 +359,59 @@ SectionRadius:NewToggle("Auto Spin Mobil dalam Radius 🏎️", "Memutar semua m
     end)
 end)
 
--- 6. Tab Setting UI (Tema Warna & Transparansi) ⚙️
+-- 6. Tab Setting UI (Tema Warna Penuh & Transparansi) ⚙️
 local Tab4 = Window:NewTab("Setting ⚙️")
 local SectionSetting = Tab4:NewSection("Kustomisasi Layar UI")
 
 -- Transparansi Background 🪟
-SectionSetting:NewSlider("Transparansi UI 🪟", "Atur tingkat transparan layar (0-100%)", 100, 0, function(value)
+local slider4 = SectionSetting:NewSlider("Transparansi UI 🪟", "Atur tingkat transparan layar (0-100%)", 100, 0, function(value)
     if mainFrame then
         mainFrame.BackgroundTransparency = value / 100
+        for _, obj in pairs(mainFrame:GetDescendants()) do
+            if obj:IsA("Frame") or obj:IsA("TextLabel") or obj:IsA("TextButton") then
+                obj.BackgroundTransparency = math.clamp((value / 100), 0, 0.8)
+            end
+        end
     end
 end)
+preventSliderDrag(slider4)
 
--- Pilihan Warna Tema 🎨
-SectionSetting:NewButton("Tema Hitam 🖤", "Mengubah background ke warna hitam", function()
+-- Fungsi Mengubah Warna Seluruh Elemen Anak UI 🎨
+local function setFullThemeColor(color)
     if mainFrame then
-        mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        mainFrame.BackgroundColor3 = color
+        for _, obj in pairs(mainFrame:GetDescendants()) do
+            if obj:IsA("GuiObject") and not obj:IsA("TextButton") then
+                obj.BackgroundColor3 = color
+            end
+        end
     end
+end
+
+SectionSetting:NewButton("Tema Hitam 🖤", "Mengubah background ke warna hitam", function()
+    setFullThemeColor(Color3.fromRGB(20, 20, 20))
 end)
 
 SectionSetting:NewButton("Tema Putih 🤍", "Mengubah background ke warna putih", function()
-    if mainFrame then
-        mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-    end
+    setFullThemeColor(Color3.fromRGB(240, 240, 240))
 end)
 
 local rgbEnabled = false
-SectionSetting:NewToggle("Tema Pelangi RGB 🌈", "Animasi warna pelangi berputar", function(state)
+SectionSetting:NewToggle("Tema Pelangi RGB Penuh 🌈", "Animasi warna pelangi di seluruh layar UI", function(state)
     rgbEnabled = state
     task.spawn(function()
         while rgbEnabled do
             if mainFrame then
                 local hue = (tick() % 5) / 5
-                mainFrame.BackgroundColor3 = Color3.fromHSV(hue, 0.8, 0.8)
+                local rainbowColor = Color3.fromHSV(hue, 0.8, 0.8)
+                mainFrame.BackgroundColor3 = rainbowColor
+                
+                -- Mengubah seluruh komponen anak UI agar RGB Penuh 🌈
+                for _, obj in pairs(mainFrame:GetDescendants()) do
+                    if obj:IsA("GuiObject") and not obj:IsA("TextButton") then
+                        obj.BackgroundColor3 = rainbowColor
+                    end
+                end
             end
             task.wait(0.03)
         end
