@@ -2,7 +2,7 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("Rafael Xiter 🚀", "Midnight")
 
--- Fitur Membuat Jendela Menu Utama Bisa Digeser (Draggable) 🔀
+-- Fitur Jendela Utama Bisa Digeser (Draggable) 🔀
 task.spawn(function()
     local coreGui = game:GetService("CoreGui")
     for _, gui in pairs(coreGui:GetChildren()) do
@@ -13,7 +13,7 @@ task.spawn(function()
     end
 end)
 
--- 2. Membuat Tombol Bulat Melayang (Toggle UI Bebas Bug) 🔘
+-- 2. Membuat Tombol Bulat Melayang (Toggle UI) 🔘
 local ToggleScreen = Instance.new("ScreenGui")
 local ToggleButton = Instance.new("TextButton")
 local UICorner = Instance.new("UICorner")
@@ -37,7 +37,7 @@ ToggleButton.Draggable = true
 UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = ToggleButton
 
--- Perbaikan Tombol Toggle: Mengubah Visible secara langsung 👁️
+-- Kontrol Buka/Tutup UI Menggunakan Visible 👁️
 ToggleButton.MouseButton1Click:Connect(function()
     local coreGui = game:GetService("CoreGui")
     for _, gui in pairs(coreGui:GetChildren()) do
@@ -47,10 +47,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Tab Teleport Player 📁
-local Tab1 = Window:NewTab("Teleport 📍")
-local Section1 = Tab1:NewSection("Pilih Player / Auto")
-
+-- Fungsi Memuat Nama Pemain 👥
 local function getPlayerNames()
     local playerList = {}
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -60,6 +57,10 @@ local function getPlayerNames()
     end
     return playerList
 end
+
+-- 3. Tab Teleport Player 📁
+local Tab1 = Window:NewTab("Teleport 📍")
+local Section1 = Tab1:NewSection("Pilih Player / Auto")
 
 local selectedPlayer = ""
 
@@ -200,73 +201,103 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
--- 5. Tab Fitur Troll 🎭 (5 Fitur)
+-- 5. Tab Fitur Troll Player & Mobil 🎭
 local Tab3 = Window:NewTab("Troll 🎭")
-local Section3 = Tab3:NewSection("Fitur Troll Lucu")
+local Section3 = Tab3:NewSection("Target & Troll Player")
 
--- Troll 1: Spin Karakter 🌀
-local spinning = false
-Section3:NewToggle("Spin Karakter 🌀", "Berputar sangat cepat", function(state)
-    spinning = state
-    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if spinning and hrp then
-        local spinVelocity = Instance.new("BodyAngularVelocity")
-        spinVelocity.Name = "SpinVelocity"
-        spinVelocity.MaxTorque = Vector3.new(0, math.huge, 0)
-        spinVelocity.AngularVelocity = Vector3.new(0, 50, 0)
-        spinVelocity.Parent = hrp
-    else
-        if hrp and hrp:FindFirstChild("SpinVelocity") then
-            hrp.SpinVelocity:Destroy()
+local trollTarget = ""
+
+local trollDropdown = Section3:NewDropdown("Pilih Target Troll", "Pilih pemain target", getPlayerNames(), function(option)
+    trollTarget = option
+end)
+
+Section3:NewButton("Refresh Target", "Update daftar nama", function()
+    trollDropdown:Refresh(getPlayerNames())
+end)
+
+-- Troll 1: Blink (Teleport Instan Dibelakang Target) ⚡
+Section3:NewButton("Blink Ke Target ⚡", "Teleport instan ke belakang target", function()
+    if trollTarget ~= "" then
+        local target = game.Players:FindFirstChild(trollTarget)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local targetHRP = target.Character.HumanoidRootPart
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
         end
     end
 end)
 
--- Troll 2: Kepala Raksasa 🗣️
-local bigHead = false
-Section3:NewToggle("Kepala Raksasa 🗣️", "Memperbesar ukuran kepala", function(state)
-    bigHead = state
-    local head = game.Players.LocalPlayer.Character:FindFirstChild("Head")
-    if head then
-        if bigHead then
-            head.Size = Vector3.new(5, 5, 5)
-        else
-            head.Size = Vector3.new(2, 1, 1)
-        end
-    end
-end)
-
--- Troll 3: Lompatan Super 🐇
-Section3:NewToggle("Lompatan Super 🐇", "Melompat sangat tinggi", function(state)
-    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        if state then
-            humanoid.JumpPower = 150
-        else
-            humanoid.JumpPower = 50
-        end
-    end
-end)
-
--- Troll 4: Mode Hantu 👻
-local ghostMode = false
-Section3:NewToggle("Mode Hantu 👻", "Menjadi kasat mata", function(state)
-    ghostMode = state
-    local char = game.Players.LocalPlayer.Character
-    if char then
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("Decal") then
-                part.Transparency = ghostMode and 0.8 or 0
+-- Troll 2: Spin Target Player 🌀
+local spinningTarget = false
+Section3:NewToggle("Spin Target Player 🌀", "Memutar pemain target", function(state)
+    spinningTarget = state
+    task.spawn(function()
+        while spinningTarget do
+            if trollTarget ~= "" then
+                local target = game.Players:FindFirstChild(trollTarget)
+                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = target.Character.HumanoidRootPart
+                    hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(45), 0)
+                end
             end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+-- Troll 3: Spin Mobil Target 🏎️
+local spinningCar = false
+Section3:NewToggle("Spin Mobil Player 🏎️", "Memutar mobil yang dikendarai target", function(state)
+    spinningCar = state
+    task.spawn(function()
+        while spinningCar do
+            if trollTarget ~= "" then
+                local target = game.Players:FindFirstChild(trollTarget)
+                if target and target.Character then
+                    local humanoid = target.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.SeatPart and humanoid.SeatPart:IsA("VehicleSeat") then
+                        local carPart = humanoid.SeatPart
+                        carPart.CFrame = carPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
+                    end
+                end
+            end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+-- Troll 4: Fling / Eliminasi Target ☠️
+Section3:NewButton("Eliminasi / Void Target ☠️", "Melempar target ke luar peta", function()
+    if trollTarget ~= "" then
+        local target = game.Players:FindFirstChild(trollTarget)
+        local myHRP = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and myHRP then
+            local targetHRP = target.Character.HumanoidRootPart
+            local bV = Instance.new("BodyVelocity")
+            bV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bV.Velocity = Vector3.new(0, -10000, 0)
+            bV.Parent = myHRP
+            
+            myHRP.CFrame = targetHRP.CFrame
+            task.wait(0.2)
+            bV:Destroy()
         end
     end
 end)
 
--- Troll 5: Gravitasi Rendah 🌌
-Section3:NewToggle("Gravitasi Bulan 🌌", "Membuat efek melayang", function(state)
-    if state then
-        workspace.Gravity = 20
+-- Troll 5: Spin Karakter Sendiri 🌀
+local selfSpin = false
+Section3:NewToggle("Spin Karakter Sendiri 🌀", "Berputar sangat cepat", function(state)
+    selfSpin = state
+    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if selfSpin and hrp then
+        local spinVel = Instance.new("BodyAngularVelocity")
+        spinVel.Name = "SelfSpinVel"
+        spinVel.MaxTorque = Vector3.new(0, math.huge, 0)
+        spinVel.AngularVelocity = Vector3.new(0, 60, 0)
+        spinVel.Parent = hrp
     else
-        workspace.Gravity = 196.2
+        if hrp and hrp:FindFirstChild("SelfSpinVel") then
+            hrp.SelfSpinVel:Destroy()
+        end
     end
 end)
