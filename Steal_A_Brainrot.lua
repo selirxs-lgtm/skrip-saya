@@ -1,122 +1,116 @@
 -- ========================================================
--- Template Custom Script: Steal a Brainrot (Roblox)
--- Dibuat untuk keperluan modifikasi dan pembuatan script sendiri
+-- CUSTOM SCRIPT: Steal a Brainrot (Full Complete)
 -- ========================================================
 
--- Cek apakah game sudah sepenuhnya dimuat
+-- 1. BAGIAN PEMBERSIH CACHE / SCRIPT LAMA (Biar gak "lengket" pas di-update)
+pcall(function()
+    -- Hapus GUI lama jika ada di CoreGui
+    if game.CoreGui:FindFirstChild("StealABrainrotHub") then
+        game.CoreGui.StealABrainrotHub:Destroy()
+    end
+    
+    -- Putus koneksi loop global lama agar tidak berjalan dobel
+    if _G.BrainrotLoopConnection then
+        _G.BrainrotLoopConnection:Disconnect()
+        _G.BrainrotLoopConnection = nil
+    end
+    
+    -- Bersihkan sampah memori Lua
+    collectgarbage("collect")
+end)
+
+-- Cek apakah game sudah termuat sempurna
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
--- Variabel Player Lokal
+-- Variabel Utama
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 
--- Notifikasi Sederhana
+-- Notifikasi Berhasil Load
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Custom Script Loaded",
-    Text = "Berhasil memuat template dasar untuk Steal a Brainrot!",
-    Duration = 5
+    Title = "Steal A Brainrot Hub",
+    Text = "Script berhasil dimuat dengan bersih tanpa cache lama!",
+    Duration = 4
 })
 
 -- ========================================================
--- CONTOH FITUR 1: Auto Collect / Teleport ke Item (Contoh)
+-- 2. FUNGSI UTAMA SCRIPT (Silakan kembangkan di sini)
 -- ========================================================
-local function AutoCollectItems()
+local function DoAutoFeature()
     pcall(function()
-        -- Sesuaikan folder/nama objek tempat item spawn di game ini
-        for _, item in pairs(Workspace:GetChildren()) do
-            if item.Name == "BrainrotItem" or item:FindFirstChild("TouchInterest") then
-                -- Teleport karakter ke posisi item (atau gunakan firetouchinterest)
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    -- Contoh mengambil dengan menyentuh bagian item
-                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, item, 0)
-                    task.wait()
-                    firetouchinterest(LocalPlayer.Character.HumanoidRootPart, item, 1)
-                end
-            end
-        end
+        -- Masukkan logika script utama kamu di sini
+        -- Contoh: Mengambil item atau interaksi game
     end)
 end
 
 -- ========================================================
--- CONTOH FITUR 2: Anti AFK (Agar tidak ter-kick saat ditinggal)
--- ========================================================
-local function EnableAntiAFK()
-    local vu = game:GetService("VirtualUser")
-    LocalPlayer.Idled:Connect(function()
-        vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    end)
-    print("Anti-AFK Aktif!")
-end
-
--- Jalankan Anti AFK secara otomatis
-EnableAntiAFK()
-
--- ========================================================
--- CONTOH PEMBUATAN UI SEDERHANA (GUI)
+-- 3. PEMBUATAN USER INTERFACE (GUI)
 -- ========================================================
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local ToggleButton = Instance.new("TextButton")
 
--- Setup ScreenGui
-ScreenGui.Name = "CustomBrainrotScript"
+-- Berikan nama unik agar mudah dideteksi untuk dibersihkan nanti
+ScreenGui.Name = "StealABrainrotHub"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- Setup MainFrame
+-- Setup MainFrame (Menu Utama)
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -90)
+MainFrame.Size = UDim2.new(0, 220, 0, 160)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Bisa digeser-geser dalam game
+MainFrame.Draggable = true -- Bisa digeser pakai mouse/jari
 
--- Setup Title
+-- Setup Title Bar
 Title.Name = "Title"
 Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.Font = Enum.Font.SourceSansBold
-Title.Text = "My Custom Hub"
+Title.Text = "Brainrot Hub [Updated]"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 
--- Setup Toggle Button
-ToggleButton.Name = "ToggleAutoCollect"
+-- Setup Tombol Toggle Fitur
+ToggleButton.Name = "ToggleButton"
 ToggleButton.Parent = MainFrame
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-ToggleButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-ToggleButton.Size = UDim2.new(0.8, 0, 0, 40)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+ToggleButton.Position = UDim2.new(0.1, 0, 0.35, 0)
+ToggleButton.Size = UDim2.new(0.8, 0, 0, 45)
 ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.Text = "Auto Collect: OFF"
+ToggleButton.Text = "Status: OFF"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 14
 
--- Logika Tombol
+-- Logika Tombol On/Off
 local isRunning = false
 ToggleButton.MouseButton1Click:Connect(function()
     isRunning = not isRunning
     if isRunning then
-        ToggleButton.Text = "Auto Collect: ON"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+        ToggleButton.Text = "Status: ON"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 83)
         
-        -- Loop berjalan terus selama aktif
-        task.spawn(function()
+        -- Jalankan loop menggunakan pointer global agar bisa diputus nanti
+        _G.BrainrotLoopConnection = task.spawn(function()
             while isRunning do
-                AutoCollectItems()
-                task.wait(0.5) -- Jeda antar eksekusi
+                DoAutoFeature()
+                task.wait(0.5)
             end
         end)
     else
-        ToggleButton.Text = "Auto Collect: OFF"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+        ToggleButton.Text = "Status: OFF"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+        
+        if _G.BrainrotLoopConnection then
+            -- Hentikan proses
+            isRunning = false
+        end
     end
 end)
