@@ -321,12 +321,11 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- 3. Ultra God Mode (Menjaga HP maksimal terus-menerus dan kebal perubahan darah)
+    -- 3. Ultra God Mode Execution
     if godModeEnabled and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if hum then
             hum.Health = hum.MaxHealth
-            -- Mencegah kematian instan dari script game
             pcall(function()
                 hum.BreakJointsOnDeath = false
             end)
