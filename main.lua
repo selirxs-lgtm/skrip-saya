@@ -1,15 +1,12 @@
--- 1. Mengunggah Library UI Orion 🖼️
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "Menu Teleport 🚀", HidePremium = false, SaveConfig = false})
+-- 1. Mengunggah Library UI yang Ringan 🖼️
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Menu Teleport Player 🚀", "Midnight")
 
 -- 2. Membuat Tab Utama 📁
-local Tab = Window:MakeTab({
-    Name = "Teleport Player 📍",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local Tab = Window:NewTab("Teleport 📍")
+local Section = Tab:NewSection("Pilih Player")
 
--- Fungsi untuk mengambil semua nama pemain di server (kecuali diri sendiri) 📋
+-- Fungsi mengambil daftar pemain 👥
 local function getPlayerNames()
     local playerList = {}
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -22,61 +19,22 @@ end
 
 local selectedPlayer = ""
 
--- 3. Memasukkan Dropdown Pilihan Pemain 👥
-local PlayerDropdown = Tab:AddDropdown({
-    Name = "Pilih Pemain Target",
-    Default = "",
-    Options = getPlayerNames(),
-    Callback = function(Value)
-        selectedPlayer = Value
-    end    
-})
+-- 3. Menu Dropdown Pemain 📜
+local dropdown = Section:NewDropdown("Pilih Pemain Target", "Klik untuk memilih", getPlayerNames(), function(option)
+    selectedPlayer = option
+end)
 
--- 4. Tombol Memperbarui Daftar Pemain (Refresh) 🔄
-Tab:AddButton({
-    Name = "Perbarui Daftar Pemain",
-    Callback = function()
-        PlayerDropdown:Refresh(getPlayerNames(), true)
-        OrionLib:MakeNotification({
-            Name = "Info ℹ️",
-            Content = "Daftar pemain berhasil diperbarui!",
-            Time = 2
-        })
-    end
-})
+-- 4. Tombol Refresh Daftar Pemain 🔄
+Section:NewButton("Refresh Daftar Pemain", "Memperbarui daftar nama", function()
+    dropdown:Refresh(getPlayerNames())
+end)
 
--- 5. Tombol Eksekusi Teleport ⚡
-Tab:AddButton({
-    Name = "Teleport Ke Player Target",
-    Callback = function()
-        if selectedPlayer == "" then
-            OrionLib:MakeNotification({
-                Name = "Peringatan ⚠️",
-                Content = "Silakan pilih nama pemain terlebih dahulu!",
-                Time = 3
-            })
-            return
-        end
-
+-- 5. Tombol Teleport ⚡
+Section:NewButton("Teleport Sekarang!", "Pindah ke lokasi pemain", function()
+    if selectedPlayer ~= "" then
         local targetPlayer = game.Players:FindFirstChild(selectedPlayer)
-        
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            -- Memindahkan posisi karakter ke target
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
-            
-            OrionLib:MakeNotification({
-                Name = "Berhasil 🎉",
-                Content = "Berhasil teleport ke " .. targetPlayer.Name,
-                Time = 3
-            })
-        else
-            OrionLib:MakeNotification({
-                Name = "Gagal ❌",
-                Content = "Pemain tidak ditemukan atau karakternya belum memuat.",
-                Time = 3
-            })
         end
-    end    
-})
-
-OrionLib:Init()
+    end
+end)
