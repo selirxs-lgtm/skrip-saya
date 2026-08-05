@@ -41,6 +41,7 @@ ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 26
 ToggleButton.Active = true
 ToggleButton.Draggable = true
+ToggleButton.ZIndex = 10
 
 ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleButton
@@ -61,6 +62,7 @@ MainFrame.Size = UDim2.new(0, 350, 0, 300)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.ClipsDescendants = true
+MainFrame.ZIndex = 1
 
 MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainFrame
@@ -72,6 +74,7 @@ Header.Name = "Header"
 Header.Parent = MainFrame
 Header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Header.Size = UDim2.new(1, 0, 0, 35)
+Header.ZIndex = 2
 
 TitleLabel.Parent = Header
 TitleLabel.BackgroundTransparency = 1
@@ -82,6 +85,7 @@ TitleLabel.Text = "Rafael Xiter 🚀"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.TextSize = 18
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.ZIndex = 3
 
 table.insert(rgbElements, Header)
 
@@ -99,6 +103,7 @@ TabBar.Parent = MainFrame
 TabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 TabBar.Position = UDim2.new(0, 0, 0, 35)
 TabBar.Size = UDim2.new(1, 0, 0, 30)
+TabBar.ZIndex = 2
 
 table.insert(rgbElements, TabBar)
 
@@ -108,9 +113,9 @@ ContentContainer.Parent = MainFrame
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.Position = UDim2.new(0, 0, 0, 65)
 ContentContainer.Size = UDim2.new(1, 0, 1, -65)
+ContentContainer.ZIndex = 2
 
 local tabs = {}
-local activeTab = nil
 
 local function createTab(name)
     local tabCount = #tabs
@@ -123,6 +128,7 @@ local function createTab(name)
     tabBtn.Text = name
     tabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
     tabBtn.TextSize = 12
+    tabBtn.ZIndex = 3
 
     local scroll = Instance.new("ScrollingFrame")
     scroll.Parent = ContentContainer
@@ -131,6 +137,7 @@ local function createTab(name)
     scroll.Visible = false
     scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     scroll.ScrollBarThickness = 4
+    scroll.ZIndex = 3
 
     local listLayout = Instance.new("UIListLayout")
     listLayout.Parent = scroll
@@ -138,7 +145,7 @@ local function createTab(name)
     listLayout.Padding = UDim.new(0, 8)
 
     listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        scroll.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 15)
+        scroll.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 20)
     end)
 
     table.insert(rgbElements, tabBtn)
@@ -177,6 +184,7 @@ local function addSlider(parentScroll, text, min, max, default, callback)
     frame.Position = UDim2.new(0.04, 0, 0, 0)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = parentScroll
+    frame.ZIndex = 4
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
@@ -194,12 +202,14 @@ local function addSlider(parentScroll, text, min, max, default, callback)
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextSize = 13
     label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 5
 
     local bar = Instance.new("Frame")
     bar.Parent = frame
     bar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     bar.Position = UDim2.new(0, 10, 0, 26)
     bar.Size = UDim2.new(1, -20, 0, 10)
+    bar.ZIndex = 5
 
     local barCorner = Instance.new("UICorner")
     barCorner.CornerRadius = UDim.new(1, 0)
@@ -210,6 +220,7 @@ local function addSlider(parentScroll, text, min, max, default, callback)
     fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     local initScale = math.clamp((default - min) / (max - min), 0, 1)
     fill.Size = UDim2.new(initScale, 0, 1, 0)
+    fill.ZIndex = 6
 
     local fillCorner = Instance.new("UICorner")
     fillCorner.CornerRadius = UDim.new(1, 0)
@@ -228,16 +239,14 @@ local function addSlider(parentScroll, text, min, max, default, callback)
         callback(val)
     end
 
-    -- Sentuhan dimulainya slider HANYA jika mengenai area bar
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             activeSlider = mySliderId
-            MainFrame.Draggable = false -- Matikan geser menu saat slider disentuh
+            MainFrame.Draggable = false
             updateValue(input.Position.X)
         end
     end)
 
-    -- Global Input Tracking
     UserInputService.InputChanged:Connect(function(input)
         if activeSlider == mySliderId and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             updateValue(input.Position.X)
@@ -247,7 +256,7 @@ local function addSlider(parentScroll, text, min, max, default, callback)
     UserInputService.InputEnded:Connect(function(input)
         if activeSlider == mySliderId and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             activeSlider = nil
-            MainFrame.Draggable = true -- Aktifkan kembali geser menu
+            MainFrame.Draggable = true
         end
     end)
 end
@@ -262,6 +271,7 @@ local function addButton(parentScroll, text, callback)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
+    btn.ZIndex = 4
     btn.Parent = parentScroll
 
     local corner = Instance.new("UICorner")
@@ -281,6 +291,7 @@ local function addToggle(parentScroll, text, defaultState, callback)
     btn.Text = text .. (state and " [ON]" or " [OFF]")
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
+    btn.ZIndex = 4
     btn.Parent = parentScroll
 
     local corner = Instance.new("UICorner")
@@ -301,6 +312,7 @@ local function addDropdown(parentScroll, text, getOptionsFunc, callback)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = parentScroll
     frame.ClipsDescendants = true
+    frame.ZIndex = 4
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
@@ -315,6 +327,7 @@ local function addDropdown(parentScroll, text, getOptionsFunc, callback)
     btn.Text = text .. " 🔽"
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
+    btn.ZIndex = 5
     btn.Parent = frame
 
     local optContainer = Instance.new("Frame")
@@ -322,6 +335,7 @@ local function addDropdown(parentScroll, text, getOptionsFunc, callback)
     optContainer.Size = UDim2.new(1, 0, 0, 0)
     optContainer.BackgroundTransparency = 1
     optContainer.Parent = frame
+    optContainer.ZIndex = 5
 
     local optLayout = Instance.new("UIListLayout")
     optLayout.Parent = optContainer
@@ -343,6 +357,7 @@ local function addDropdown(parentScroll, text, getOptionsFunc, callback)
                 oBtn.Text = optName
                 oBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
                 oBtn.TextSize = 12
+                oBtn.ZIndex = 6
                 oBtn.Parent = optContainer
                 totalHeight = totalHeight + 25
 
