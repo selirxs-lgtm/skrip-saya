@@ -1,17 +1,18 @@
 -- ========================================================
--- CUSTOM SCRIPT: Steal a Brainrot [Ultimate Fixed & Working]
+-- CUSTOM SCRIPT: Steal a Brainrot [Colorful Rainbow Edition]
 -- ========================================================
 
 pcall(function()
     local lp = game:GetService("Players").LocalPlayer
     if lp and lp:FindFirstChild("PlayerGui") then
-        if lp.PlayerGui:FindFirstChild("BrainrotGodHub") then
-            lp.PlayerGui.BrainrotGodHub:Destroy()
+        if lp.PlayerGui:FindFirstChild("BrainrotRainbowHub") then
+            lp.PlayerGui.BrainrotRainbowHub:Destroy()
         end
     end
     if _G.StealLoop then task.cancel(_G.StealLoop) end
     if _G.SpeedLoop then _G.SpeedLoop:Disconnect() end
     if _G.NoclipConn then _G.NoclipConn:Disconnect() end
+    if _G.RainbowConn then _G.RainbowConn:Disconnect() end
     collectgarbage("collect")
 end)
 
@@ -26,13 +27,13 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Brainrot Hub [Fixed]",
-    Text = "Script diperbaiki total! Anti-mati & Anti-mental.",
+    Title = "Brainrot Rainbow Hub",
+    Text = "Menu berhasil dimuat dengan tema warna gaming!",
     Duration = 3
 })
 
 -- ========================================================
--- UI UTAMA
+-- UI UTAMA (COLORFUL & GAMING STYLE)
 -- ========================================================
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
@@ -42,30 +43,36 @@ local CloseButton = Instance.new("TextButton")
 local ContentContainer = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
 
-ScreenGui.Name = "BrainrotGodHub"
+ScreenGui.Name = "BrainrotRainbowHub"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 28)
 MainFrame.Position = UDim2.new(0.5, -150, 0.5, -190)
 MainFrame.Size = UDim2.new(0, 300, 0, 380)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
 local UICornerMain = Instance.new("UICorner")
-UICornerMain.CornerRadius = UDim.new(0, 10)
+UICornerMain.CornerRadius = UDim.new(0, 12)
 UICornerMain.Parent = MainFrame
+
+-- Border Pinggiran Neon UI
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Parent = MainFrame
+UIStroke.Color = Color3.fromRGB(138, 43, 226) -- Ungu Neon
+UIStroke.Thickness = 2
 
 TopBar.Name = "TopBar"
 TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 42)
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 
 local UICornerTop = Instance.new("UICorner")
-UICornerTop.CornerRadius = UDim.new(0, 10)
+UICornerTop.CornerRadius = UDim.new(0, 12)
 UICornerTop.Parent = TopBar
 
 Title.Parent = TopBar
@@ -73,14 +80,24 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0.05, 0, 0, 0)
 Title.Size = UDim2.new(0.7, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "Steal a Brainrot [Fixed Pro]"
+Title.Text = "✨ Brainrot Gaming Hub ✨"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Efek Warna Pelangi (RGB) otomatis bergerak di Judul & Border
+_G.RainbowConn = RunService.RenderStepped:Connect(function()
+    local hue = tick() % 5 / 5
+    local rainbowColor = Color3.fromHSV(hue, 1, 1)
+    pcall(function()
+        UIStroke.Color = rainbowColor
+        Title.TextColor3 = rainbowColor
+    end)
+end)
+
 CloseButton.Name = "CloseButton"
 CloseButton.Parent = TopBar
-CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
 CloseButton.Position = UDim2.new(1, -35, 0.5, -12)
 CloseButton.Size = UDim2.new(0, 24, 0, 24)
 CloseButton.Font = Enum.Font.GothamBold
@@ -99,11 +116,11 @@ CloseButton.MouseButton1Click:Connect(function()
     if isMinimized then
         MainFrame.Size = UDim2.new(0, 300, 0, 45)
         CloseButton.Text = "+"
-        CloseButton.BackgroundColor3 = Color3.fromRGB(0, 170, 90)
+        CloseButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
     else
         MainFrame.Size = UDim2.new(0, 300, 0, 380)
         CloseButton.Text = "-"
-        CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        CloseButton.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
     end
 end)
 
@@ -122,15 +139,15 @@ UIListLayout.Padding = UDim.new(0, 8)
 local function CreateButton(name, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = ContentContainer
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 52)
     btn.Size = UDim2.new(1, 0, 0, 40)
     btn.Font = Enum.Font.GothamSemibold
     btn.Text = name .. " [ OFF ]"
-    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    btn.TextColor3 = Color3.fromRGB(200, 200, 220)
     btn.TextSize = 13
 
     local UICornerBtn = Instance.new("UICorner")
-    UICornerBtn.CornerRadius = UDim.new(0, 6)
+    UICornerBtn.CornerRadius = UDim.new(0, 8)
     UICornerBtn.Parent = btn
 
     local state = false
@@ -139,21 +156,21 @@ local function CreateButton(name, callback)
         if state then
             btn.Text = name .. " [ ON ]"
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(0, 170, 90)
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 110) -- Hijau Neon Terang
         else
             btn.Text = name .. " [ OFF ]"
-            btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+            btn.TextColor3 = Color3.fromRGB(200, 200, 220)
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 52) -- Gelap Elegan
         end
         callback(state)
     end)
 end
 
 -- ========================================================
--- FITUR DIPERBAIKI TOTAL (AMAN & WORK)
+-- FITUR SAKTI
 -- ========================================================
 
--- 1. Wallhack / Noclip Aman (Tanpa Mental Keluar Map)
+-- 1. Wallhack / Noclip Aman
 CreateButton("Wallhack / Noclip (Aman)", function(enabled)
     if enabled then
         _G.NoclipConn = RunService.Stepped:Connect(function()
@@ -176,7 +193,7 @@ CreateButton("Wallhack / Noclip (Aman)", function(enabled)
     end
 end)
 
--- 2. Auto Steal / Tarik Item Berbasis Jarak (Magnitude)
+-- 2. Auto Steal / Tarik Item Terdekat
 CreateButton("Auto Steal / Tarik Item Terdekat", function(enabled)
     if enabled then
         _G.StealLoop = task.spawn(function()
@@ -188,7 +205,7 @@ CreateButton("Auto Steal / Tarik Item Terdekat", function(enabled)
                         for _, obj in pairs(Workspace:GetDescendants()) do
                             if obj:IsA("BasePart") and (obj.Name:lower():find("brainrot") or obj.Name:lower():find("anomali") or obj.Name:lower():find("item") or obj:FindFirstChild("TouchInterest")) then
                                 local dist = (hrp.Position - obj.Position).Magnitude
-                                if dist < 35 then -- Jika item berada dalam radius 35 stud, tarik langsung posisinya ke kita
+                                if dist < 35 then
                                     obj.CFrame = hrp.CFrame
                                     firetouchinterest(hrp, obj, 0)
                                     task.wait(0.05)
@@ -218,7 +235,6 @@ CreateButton("Speed Hack (Aman)", function(enabled)
                 if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
                     local hum = char.Humanoid
                     if hum.MoveDirection.Magnitude > 0 then
-                        -- Mengunci sumbu Y agar tidak tembus ke bawah tanah / void
                         local currentPos = char.HumanoidRootPart.Position
                         local moveDir = hum.MoveDirection
                         char.HumanoidRootPart.CFrame = CFrame.new(currentPos + (moveDir * 0.7)) * CFrame.Angles(0, select(2, char.HumanoidRootPart.CFrame:ToOrientation()), 0)
