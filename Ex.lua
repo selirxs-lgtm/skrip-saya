@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
@@ -8,7 +9,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHept
 -- Buat Window Utama
 local Window = Library.CreateLib("Rafael Xiter 🚀", "DarkTheme")
 
--- Tab Fitur Utama (Secara otomatis mendukung scrolling di Kavo UI jika kontennya banyak)
+-- Tab Fitur Utama
 local Tab = Window:NewTab("Fitur Utama")
 local Section = Tab:NewSection("Menu Cheat & Fitur")
 
@@ -43,16 +44,37 @@ Section:NewToggle("Super Jump", "Loncat tinggi banget", function(state)
     jumpEnabled = state
 end)
 
--- Tambahan Tab Setting / Credit buat meramaikan menu scroll
-local SettingTab = Window:NewTab("Pengaturan")
-local SettingSection = SettingTab:NewSection("Kontrol Menu")
-
-SettingSection:NewButton("Buka/Tutup Menu", "Klik untuk toggle UI", function()
-    Library:ToggleUI()
+-- --- TAMBAHAN TOMBOL FLOATING ON/OFF YG BISA DIGESER ---
+pcall(function()
+    local old = CoreGui:FindFirstChild("RafaelXiter_FloatToggle")
+    if old then old:Destroy() end
 end)
 
-SettingSection:NewLabel("Status: Berjalan Normal")
-SettingSection:NewLabel("Author: Rafael Xiter")
+local FloatGui = Instance.new("ScreenGui")
+FloatGui.Name = "RafaelXiter_FloatToggle"
+FloatGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
+FloatGui.ResetOnSpawn = false
+
+local ToggleBtn = Instance.new("TextButton", FloatGui)
+ToggleBtn.Size = UDim2.new(0, 110, 0, 36)
+ToggleBtn.Position = UDim2.new(0, 20, 0, 150)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
+ToggleBtn.Text = "⚡ MENU ON/OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(15, 15, 20)
+ToggleBtn.TextSize = 10
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true -- Biar tombolnya bisa digeser-geser di layar HP!
+
+local BtnCorner = Instance.new("UICorner", ToggleBtn)
+BtnCorner.CornerRadius = UDim.new(0, 8)
+
+local menuVisible = true
+ToggleBtn.MouseButton1Click:Connect(function()
+    menuVisible = not menuVisible
+    Library:ToggleUI() -- Perintah bawaan Kavo buat sembunyikan/tampilkan menu
+end)
+--------------------------------------------------------
 
 -- Eksekusi Fitur di Background
 RunService.RenderStepped:Connect(function()
