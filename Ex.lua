@@ -12,7 +12,6 @@ local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
-local menuVisible = true
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
@@ -112,7 +111,7 @@ InfoText.TextSize = 12
 InfoText.Font = Enum.Font.SourceSansItalic
 InfoText.Parent = MainFrame
 
--- Tombol Buka/Tutup Menu (Floating Button kecil saat menu ditutup)
+-- Tombol Buka Menu (Floating Button kecil saat menu ditutup)
 local OpenButton = Instance.new("TextButton")
 OpenButton.Size = UDim2.new(0, 100, 0, 30)
 OpenButton.Position = UDim2.new(0, 10, 0, 10)
@@ -131,7 +130,6 @@ OpenCorner.Parent = OpenButton
 -----------------------------------------
 -- ESP Storage Setup
 -----------------------------------------
-local ESP_FOLDER_NAME = "ESP_Storage"
 local espFolder = workspace:FindFirstChild(ESP_FOLDER_NAME)
 if espFolder then espFolder:Destroy() end
 espFolder = Instance.new("Folder")
@@ -300,7 +298,7 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- 4. Super Speed & Super Jump Execution
+-- 4. Super Speed & Super Jump Execution
     local char = LocalPlayer.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if hum then
