@@ -14,13 +14,13 @@ local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
-local aimbotSmooth = 0.25 -- Kecepatan kuncian (semakin kecil semakin kuat/instan lengketnya)
+local aimbotSmooth = 0.25 -- Semakin kecil semakin instan & lengket kunciannya
 local fovRadius = 120    
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenuFixed"
+ScreenGui.Name = "AdvancedMenuV7"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -59,7 +59,7 @@ local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 6)
 TopCorner.Parent = TopDetector
 
--- Menu Frame (Diperbesar untuk menu tambahan God Mode & FOV Size)
+-- Menu Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 240, 0, 460)
 MainFrame.Position = UDim2.new(0.5, -120, 0.2, 0)
@@ -121,7 +121,7 @@ local ToggleESP = createButton(45, "ESP")
 local ToggleAim = createButton(85, "AIMBOT (BODY/HEAD)")
 local ToggleGod = createButton(125, "UNLIMITED HEALTH")
 local ToggleFOV = createButton(165, "FOV CIRCLE") 
-local ToggleSizeFOV = createButton(205, "FOV SIZE: 120") 
+local ToggleSizeFOV = createButton(205, "FOV SIZE: 120") -- Tombol khusus pengubah ukuran FOV
 local ToggleNoclip = createButton(245, "WALLHACK (NOCLIP)")
 local ToggleSpeed = createButton(285, "SUPER SPEED")
 local ToggleJump = createButton(325, "SUPER JUMP")
@@ -169,7 +169,7 @@ local function removeESP(player)
 end
 
 -----------------------------------------
--- Improved Aimbot Logic (Super Sticky & Precise)
+-- Aimbot Logic: Mengunci ke Seluruh Bagian Tubuh (Body & Head) dalam FOV
 -----------------------------------------
 local function getClosestPartInFOV()
     local closestPart = nil
@@ -182,11 +182,9 @@ local function getClosestPartInFOV()
             local humanoid = character:FindFirstChildOfClass("Humanoid")
 
             if humanoid and humanoid.Health > 0 then
-                -- Cek bagian tubuh utama yang paling akurat untuk ditembak (Prioritas Kepala & HumanoidRootPart/Badan)
-                local targetParts = {character:FindFirstChild("Head"), character:FindFirstChild("HumanoidRootPart"), character:FindFirstChild("UpperTorso"), character:FindFirstChild("Torso")}
-                
-                for _, part in ipairs(targetParts) do
-                    if part then
+                -- Mendeteksi seluruh bagian tubuh musuh (Kepala, Badan, Torso) agar sangat mudah ngelok
+                for _, part in ipairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
                         local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
                         if onScreen then
                             local screenVector = Vector2.new(screenPos.X, screenPos.Y)
@@ -316,7 +314,7 @@ RunService.RenderStepped:Connect(function()
         TopDetector.Text = "Players Detected: 0"
     end
 
-    -- 2. Fixed & Sticky Aimbot Execution (Menggunakan CFrame.lookAt yang stabil & lengket)
+    -- 2. Fixed & Sticky Aimbot Execution (Menggunakan lookAt agar sangat lengket)
     if aimbotEnabled and aiming then
         local targetPart = getClosestPartInFOV()
         if targetPart then
@@ -381,7 +379,7 @@ setupToggle(ToggleFOV, "FOV CIRCLE", "FOV CIRCLE", function(state)
     FOVCircle.Visible = state 
 end)
 
--- Tombol Pengatur Ukuran FOV
+-- Tombol Khusus Pengubah Ukuran FOV (Berputar: 120 -> 180 -> 240 -> 300 -> 80)
 ToggleSizeFOV.MouseButton1Click:Connect(function()
     if fovRadius == 120 then
         fovRadius = 180
