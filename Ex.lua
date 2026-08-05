@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
@@ -11,7 +10,7 @@ local Window = Library.CreateLib("Rafael Xiter 🚀", "DarkTheme")
 
 -- Tab Fitur Utama
 local Tab = Window:NewTab("Fitur Utama")
-local Section = Tab:NewSection("Menu Cheat & Fitur")
+local Section = Tab:NewSection("Menu Cheat & Fitur Utama")
 
 local godModeEnabled = false
 local noclipEnabled = false
@@ -44,37 +43,23 @@ Section:NewToggle("Super Jump", "Loncat tinggi banget", function(state)
     jumpEnabled = state
 end)
 
--- --- TAMBAHAN TOMBOL FLOATING ON/OFF YG BISA DIGESER ---
-pcall(function()
-    local old = CoreGui:FindFirstChild("RafaelXiter_FloatToggle")
-    if old then old:Destroy() end
+-- Section Kedua untuk bikin kontennya panjang ke bawah biar menu otomatis bisa di-scroll
+local Section2 = Tab:NewSection("Pengaturan Tambahan & Informasi")
+
+Section2:NewSlider("Atur WalkSpeed", "Mengubah kecepatan jalan", 500, 16, function(v)
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if hum and speedEnabled then hum.WalkSpeed = v end
 end)
 
-local FloatGui = Instance.new("ScreenGui")
-FloatGui.Name = "RafaelXiter_FloatToggle"
-FloatGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
-FloatGui.ResetOnSpawn = false
-
-local ToggleBtn = Instance.new("TextButton", FloatGui)
-ToggleBtn.Size = UDim2.new(0, 110, 0, 36)
-ToggleBtn.Position = UDim2.new(0, 20, 0, 150)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
-ToggleBtn.Text = "⚡ MENU ON/OFF"
-ToggleBtn.TextColor3 = Color3.fromRGB(15, 15, 20)
-ToggleBtn.TextSize = 10
-ToggleBtn.Font = Enum.Font.GothamBold
-ToggleBtn.Active = true
-ToggleBtn.Draggable = true -- Biar tombolnya bisa digeser-geser di layar HP!
-
-local BtnCorner = Instance.new("UICorner", ToggleBtn)
-BtnCorner.CornerRadius = UDim.new(0, 8)
-
-local menuVisible = true
-ToggleBtn.MouseButton1Click:Connect(function()
-    menuVisible = not menuVisible
-    Library:ToggleUI() -- Perintah bawaan Kavo buat sembunyikan/tampilkan menu
+Section2:NewButton("Reset Karakter", "Membunuh karakter (Reset)", function()
+    if LocalPlayer.Character then
+        LocalPlayer.Character:BreakJoints()
+    end
 end)
---------------------------------------------------------
+
+Section2:NewLabel("Status Script: Aman & Lancar")
+Section2:NewLabel("Creator: Rafael Xiter")
+Section2:NewLabel("Versi: Kavo Mobile UI Fixed")
 
 -- Eksekusi Fitur di Background
 RunService.RenderStepped:Connect(function()
