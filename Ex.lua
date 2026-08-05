@@ -12,16 +12,36 @@ local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
-local aimbotSmooth = 0.3 -- Tingkat kelengketan aim (semakin kecil semakin halus/lengket)
+local aimbotSmooth = 0.3 -- Semakin kecil semakin halus/lengket
+local fovRadius = 120    -- Ukuran radius lingkaran FOV (dalam pixel)
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenuV3"
+ScreenGui.Name = "AdvancedMenuFOV"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- HUD / Player Detector di Atas Layar (Di luar Menu)
+-- Lingkaran FOV di Tengah Layar (Menggunakan Drawing API / UI Frame alternatif agar kompatibel di Mobile)
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Name = "FOVCircle"
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
+FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVCircle.BackgroundTransparency = 1
+FOVCircle.Visible = false
+FOVCircle.Parent = ScreenGui
+
+local UICircle = Instance.new("UICorner")
+UICircle.CornerRadius = UDim.new(1, 0)
+UICircle.Parent = FOVCircle
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 1.5
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
+UIStroke.Parent = FOVCircle
+
+-- HUD / Player Detector di Atas Layar
 local TopDetector = Instance.new("TextLabel")
 TopDetector.Size = UDim2.new(0, 200, 0, 35)
 TopDetector.Position = UDim2.new(0.5, -100, 0, 10)
@@ -55,14 +75,14 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -40, 0, 35)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "ROBLOX MENU V3"
+Title.Text = "ROBLOX MENU V4 (FOV)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
--- Close Button (X) di Pojok Kanan Atas Menu
+-- Close Button (X)
 local CloseButton = Instance.new("TextButton")
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Position = UDim2.new(1, -35, 0, 3)
@@ -112,7 +132,7 @@ InfoText.TextSize = 12
 InfoText.Font = Enum.Font.SourceSansItalic
 InfoText.Parent = MainFrame
 
--- Tombol Buka Menu (Floating Button kecil saat menu ditutup)
+-- Open Button
 local OpenButton = Instance.new("TextButton")
 OpenButton.Size = UDim2.new(0, 100, 0, 30)
 OpenButton.Position = UDim2.new(0, 10, 0, 10)
@@ -144,9 +164,9 @@ local function removeESP(player)
 end
 
 -----------------------------------------
--- Aimbot Logic
+-- Aimbot Logic with FOV Restriction
 -----------------------------------------
-local function getClosestPlayerToCursor()
+local function getClosestPlayerInFOV()
     local closestPlayer = nil
     local shortestDistance = math.huge
     local mousePos = UserInputService:GetMouseLocation()
@@ -159,9 +179,12 @@ local function getClosestPlayerToCursor()
             if humanoid and humanoid.Health > 0 then
                 local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
                 if onScreen then
-                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    if distance < shortestDistance then
-                        shortestDistance = distance
+                    local screenVector = Vector2.new(screenPos.X, screenPos.Y)
+                    local distanceToMouse = (screenVector - mousePos).Magnitude
+                    
+                    -- Cek apakah target berada di dalam batas lingkaran FOV dan jarak terdekat
+                    if distanceToMouse <= fovRadius and distanceToMouse < shortestDistance then
+                        shortestDistance = distanceToMouse
                         closestPlayer = player
                     end
                 end
@@ -282,9 +305,9 @@ RunService.RenderStepped:Connect(function()
         TopDetector.Text = "Players Detected: 0"
     end
 
-    -- 2. Aimbot Execution (Smooth & Sticky for One Tap)
+    -- 2. Aimbot Execution with FOV Check
     if aimbotEnabled and aiming then
-        local target = getClosestPlayerToCursor()
+        local target = getClosestPlayerInFOV()
         if target and target.Character and target.Character:FindFirstChild("Head") then
             local targetHead = target.Character.Head.Position
             local currentCFrame = Camera.CFrame
@@ -295,7 +318,8 @@ RunService.RenderStepped:Connect(function()
 
     -- 3. Noclip (Wall Hack) Execution
     if noclipEnabled and LocalPlayer.Character then
-        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+        local char = LocalPlayer.Character
+        for _, part in ipairs(char:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
             end
@@ -331,7 +355,12 @@ local function setupToggle(button, onText, offText, callback)
 end
 
 setupToggle(ToggleESP, "ESP", "ESP", function(state) espEnabled = state if not state then espFolder:ClearAllChildren() end end)
-setupToggle(ToggleAim, "AIMBOT HEAD", "AIMBOT HEAD", function(state) aimbotEnabled = state end)
+
+setupToggle(ToggleAim, "AIMBOT HEAD", "AIMBOT HEAD", function(state) 
+    aimbotEnabled = state 
+    FOVCircle.Visible = state -- Lingkaran FOV akan muncul saat Aimbot dinyalakan
+end)
+
 setupToggle(ToggleNoclip, "WALLHACK (NOCLIP)", "WALLHACK (NOCLIP)", function(state) noclipEnabled = state end)
 
 setupToggle(ToggleSpeed, "SUPER SPEED", "SUPER SPEED", function(state) 
