@@ -14,13 +14,13 @@ local noclipEnabled = false
 local speedEnabled = false
 local jumpEnabled = false
 local aiming = false
-local aimbotSmooth = 0.25 -- Semakin kecil semakin instan & lengket kunciannya
+local aimbotSmooth = 0.25 
 local fovRadius = 120    
 local ESP_FOLDER_NAME = "ESP_Storage"
 
 -- Main ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdvancedMenuV7"
+ScreenGui.Name = "AdvancedMenuV7_1"
 ScreenGui.Parent = (gethui and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
@@ -77,9 +77,9 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -40, 0, 35)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "ROBLOX MENU V7 (GOD & AIM)"
+Title.Text = "ROBLOX MENU V7.1 (ULTRA GOD)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
@@ -121,7 +121,7 @@ local ToggleESP = createButton(45, "ESP")
 local ToggleAim = createButton(85, "AIMBOT (BODY/HEAD)")
 local ToggleGod = createButton(125, "UNLIMITED HEALTH")
 local ToggleFOV = createButton(165, "FOV CIRCLE") 
-local ToggleSizeFOV = createButton(205, "FOV SIZE: 120") -- Tombol khusus pengubah ukuran FOV
+local ToggleSizeFOV = createButton(205, "FOV SIZE: 120") 
 local ToggleNoclip = createButton(245, "WALLHACK (NOCLIP)")
 local ToggleSpeed = createButton(285, "SUPER SPEED")
 local ToggleJump = createButton(325, "SUPER JUMP")
@@ -169,7 +169,7 @@ local function removeESP(player)
 end
 
 -----------------------------------------
--- Aimbot Logic: Mengunci ke Seluruh Bagian Tubuh (Body & Head) dalam FOV
+-- Aimbot Logic: Mengunci ke Seluruh Bagian Tubuh
 -----------------------------------------
 local function getClosestPartInFOV()
     local closestPart = nil
@@ -182,7 +182,6 @@ local function getClosestPartInFOV()
             local humanoid = character:FindFirstChildOfClass("Humanoid")
 
             if humanoid and humanoid.Health > 0 then
-                -- Mendeteksi seluruh bagian tubuh musuh (Kepala, Badan, Torso) agar sangat mudah ngelok
                 for _, part in ipairs(character:GetChildren()) do
                     if part:IsA("BasePart") then
                         local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
@@ -244,7 +243,6 @@ RunService.RenderStepped:Connect(function()
             tag.Parent = espFolder
         end
 
-        -- Name Tag
         local billboard = tag:FindFirstChild("NameTag")
         if not billboard then
             billboard = Instance.new("BillboardGui")
@@ -267,7 +265,6 @@ RunService.RenderStepped:Connect(function()
         billboard:FindFirstChild("PlayerName").Text = player.Name
         billboard.Parent = tag
 
-        -- Tracer Line
         local att0 = tag:FindFirstChild("PlayerAtt")
         local att1 = tag:FindFirstChild("ScreenAtt")
         local beam = tag:FindFirstChild("TracerBeam")
@@ -314,7 +311,7 @@ RunService.RenderStepped:Connect(function()
         TopDetector.Text = "Players Detected: 0"
     end
 
-    -- 2. Fixed & Sticky Aimbot Execution (Menggunakan lookAt agar sangat lengket)
+    -- 2. Sticky Aimbot Execution
     if aimbotEnabled and aiming then
         local targetPart = getClosestPartInFOV()
         if targetPart then
@@ -324,15 +321,19 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- 3. Unlimited Health (God Mode) Execution
+    -- 3. Ultra God Mode (Menjaga HP maksimal terus-menerus dan kebal perubahan darah)
     if godModeEnabled and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if hum then
             hum.Health = hum.MaxHealth
+            -- Mencegah kematian instan dari script game
+            pcall(function()
+                hum.BreakJointsOnDeath = false
+            end)
         end
     end
 
-    -- 4. Noclip (Wall Hack) Execution
+    -- 4. Noclip Execution
     if noclipEnabled and LocalPlayer.Character then
         local char = LocalPlayer.Character
         for _, part in ipairs(char:GetDescendants()) do
@@ -379,7 +380,6 @@ setupToggle(ToggleFOV, "FOV CIRCLE", "FOV CIRCLE", function(state)
     FOVCircle.Visible = state 
 end)
 
--- Tombol Khusus Pengubah Ukuran FOV (Berputar: 120 -> 180 -> 240 -> 300 -> 80)
 ToggleSizeFOV.MouseButton1Click:Connect(function()
     if fovRadius == 120 then
         fovRadius = 180
