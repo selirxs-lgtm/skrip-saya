@@ -179,7 +179,8 @@ game:GetService("RunService").RenderStepped:Connect(function()
 		local velocity = Vector3.new(0, 0, 0)
 		
 		if moveDirection.Magnitude > 0 then
-			velocity = (camLook * Vector3.new(1,0,1)).Unit * moveDirection.Z * speed 
+			-- Perbaikan arah minus (-) agar sesuai dengan tombol W/S
+			velocity = (camLook * Vector3.new(1,0,1)).Unit * (-moveDirection.Z) * speed 
 				+ (camRight * Vector3.new(1,0,1)).Unit * moveDirection.X * speed
 		else
 			velocity = Vector3.new(0, 0, 0)
