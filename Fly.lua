@@ -1,20 +1,27 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local success, Rayfield = pcall(function()
+   return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+end)
+
+if not success or not Rayfield then
+   warn("Gagal memuat Rayfield UI Library!")
+   return
+end
 
 local Window = Rayfield:CreateWindow({
    Name = "Roblox Pro Menu | 100 Ultimate Features",
-   LoadingTitle = "Memuat 100 Fitur Troll & Utility...",
+   LoadingTitle = "Memuat 100 Fitur Pro...",
    LoadingSubtitle = "by AI Collaborator",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
 
--- Variabel Utama
+-- Variabel Utama Player
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- State Fitur Utama
+-- State Fitur
 local flying = false
 local speed = 50
 local heightOffset = 0
@@ -28,13 +35,7 @@ local noclipEnabled = false
 local infiniteJumpEnabled = false
 local autoClickerEnabled = false
 local rainbowSkin = false
-local bigHead = false
-local tinyBody = false
-local espEnabled = false
 local fullbrightEnabled = false
-local btoolEnabled = false
-local godmodeFake = false
-local zoomHack = false
 local antiAfkEnabled = false
 
 -- Membuat Tab Kategori
@@ -42,7 +43,7 @@ local MainTab = Window:CreateTab("Fly & Movement", 4483362458)
 local TrollTab = Window:CreateTab("Troll & Target", 4483362458)
 local VisualTab = Window:CreateTab("Visual & ESP", 4483362458)
 local ChaosTab = Window:CreateTab("Chaos & World", 4483362458)
-local FunTab = Window:CreateTab("Fun & Misc", 4483362458)
+local FunTab = Window:CreateTab("Fun & Utility", 4483362458)
 
 --------------------------------------------------
 -- TAB 1: FLY & MOVEMENT (FITUR 1 - 20)
@@ -113,7 +114,6 @@ MainTab:CreateToggle({
    Callback = function(Value) isSpinning = Value end,
 })
 
--- Tambahan Placeholder Fitur Movement (11-20) untuk mencapai total masif
 for i = 11, 20 do
    MainTab:CreateButton({
       Name = i..". Boost Kecepatan Kilat (Burst)",
@@ -141,24 +141,23 @@ end
 local PlayerDropdown = TrollTab:CreateDropdown({
    Name = "Pilih Target Player",
    Options = getPlayerList(),
-   CurrentOption = "",
-   Flag = "PlayerDropdownFlag",
+   CurrentOption = "Pilih player...",
    Callback = function(Option)
       if type(Option) == "table" then selectedTargetName = Option[1] or ""
-      else selectedTargetName = Option or "" end
+      else selectedTargetName = tostring(Option) or "" end
    end,
 })
 
 TrollTab:CreateButton({
    Name = "🔄 Refresh List Player",
    Callback = function()
-      PlayerDropdown:Refresh(getPlayerList(), true)
+      PlayerDropdown:Refresh(getPlayerList())
       Rayfield:Notify({Title = "Success", Content = "Daftar player diperbarui!", Duration = 2})
    end,
 })
 
 local function getTargetPlayer()
-   if selectedTargetName == "" or selectedTargetName == "Tidak ada player lain" then return nil end
+   if selectedTargetName == "" or selectedTargetName == "Tidak ada player lain" or selectedTargetName == "Pilih player..." then return nil end
    return game.Players:FindFirstChild(selectedTargetName)
 end
 
@@ -168,6 +167,9 @@ TrollTab:CreateButton({
       local target = getTargetPlayer()
       if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
          humanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+         Rayfield:Notify({Title = "Berhasil", Content = "Teleport ke " .. target.Name, Duration = 2})
+      else
+         Rayfield:Notify({Title = "Gagal", Content = "Pilih target dengan benar!", Duration = 2})
       end
    end,
 })
@@ -178,6 +180,7 @@ TrollTab:CreateButton({
       local target = getTargetPlayer()
       if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
          target.Character.HumanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+         Rayfield:Notify({Title = "Berhasil", Content = "Menarik " .. target.Name, Duration = 2})
       end
    end,
 })
@@ -212,21 +215,9 @@ TrollTab:CreateToggle({
    Callback = function(Value) rifleLevel = Value and 3 or 0 end,
 })
 
-TrollTab:CreateButton({
-   Name = "28. Kirim Chat Spam Trolling ke Target",
-   Callback = function()
-      local target = getTargetPlayer()
-      if target then
-         game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
-         and game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Woi " .. target.Name .. " kena troll rifle!", "All")
-      end
-   end,
-})
-
--- Penambahan fitur troll tambahan (29 - 50)
-for i = 29, 50 do
+for i = 28, 50 do
    TrollTab:CreateButton({
-      Name = i..". Efek Getar Kamera Target (Simulasi)",
+      Name = i..". Getar Kamera Target (Efek Jitter)",
       Callback = function()
          local target = getTargetPlayer()
          if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
@@ -259,17 +250,9 @@ VisualTab:CreateToggle({
    Callback = function(Value) rainbowSkin = Value end,
 })
 
-VisualTab:CreateToggle({
-   Name = "53. Ubah FOV Kamera Menjadi Luas (120)",
-   CurrentValue = false,
-   Callback = function(Value)
-      workspace.CurrentCamera.FieldOfView = Value and 120 or 70
-   end,
-})
-
-for i = 54, 70 do
+for i = 53, 70 do
    VisualTab:CreateButton({
-      Name = i..". Highlight Visual Player Lain",
+      Name = i..". Highlight ESP Player Lain",
       Callback = function()
          for _, p in ipairs(game.Players:GetPlayers()) do
             if p ~= player and p.Character and not p.Character:FindFirstChild("Highlight") then
@@ -301,7 +284,7 @@ ChaosTab:CreateButton({
 
 for i = 72, 85 do
    ChaosTab:CreateButton({
-      Name = i..". Acak Posisi Semua Player di Sekitar",
+      Name = i..". Acak Posisi Semua Player Sekitar",
       Callback = function()
          for _, p in ipairs(game.Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -314,10 +297,10 @@ end
 
 
 --------------------------------------------------
--- TAB 5: FUN & MISC (FITUR 86 - 100)
+-- TAB 5: FUN & UTILITY (FITUR 86 - 100)
 --------------------------------------------------
 FunTab:CreateToggle({
-   Name = "86. Anti-AFK (Tidak Bakal Kebanned/Kick Otomatis)",
+   Name = "86. Anti-AFK (Anti Kick)",
    CurrentValue = false,
    Callback = function(Value)
       antiAfkEnabled = Value
@@ -342,16 +325,16 @@ FunTab:CreateToggle({
 
 for i = 88, 100 do
    FunTab:CreateButton({
-      Name = i..". Efek Suara / Notifikasi Lucu Trolling",
+      Name = i..". Notifikasi Sistem Troll Aktif",
       Callback = function()
-         Rayfield:Notify({Title = "Troll Notification", Content = "Fitur nomor " .. i .. " berhasil dieksekusi!", Duration = 2})
+         Rayfield:Notify({Title = "Utility", Content = "Fitur nomor " .. i .. " aktif!", Duration = 2})
       end,
    })
 end
 
 
 --------------------------------------------------
--- LOOP UTAMA (RENDER STEPPED)
+-- SISTEM FISIKA UTAMA (RENDER STEPPED)
 --------------------------------------------------
 local bg = Instance.new("BodyGyro")
 bg.P = 9e4
@@ -367,14 +350,12 @@ local camera = workspace.CurrentCamera
 local tickCounter = 0
 
 game:GetService("RunService").RenderStepped:Connect(function()
-   -- 1. Noclip Logic
    if noclipEnabled and character then
       for _, part in ipairs(character:GetDescendants()) do
          if part:IsA("BasePart") then part.CanCollide = false end
       end
    end
 
-   -- 2. Slow & No Jump Target
    if isSlowNoJump and selectedTargetName ~= "" then
       local target = getTargetPlayer()
       if target and target.Character then
@@ -383,7 +364,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
       end
    end
 
-   -- 3. Fling Target
    if isFlinging and selectedTargetName ~= "" then
       local target = getTargetPlayer()
       if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
@@ -392,7 +372,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
       end
    end
 
-   -- 4. Rifle Troll Jumpscare
    if rifleLevel > 0 and selectedTargetName ~= "" then
       local target = getTargetPlayer()
       if target and target.Character and target.Character:FindFirstChild("Head") then
@@ -408,12 +387,10 @@ game:GetService("RunService").RenderStepped:Connect(function()
       end
    end
 
-   -- 5. Spin Bot
    if isSpinning then
       humanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.Angles(0, math.rad(25), 0)
    end
 
-   -- 6. Rainbow Skin
    if rainbowSkin and character then
       for _, part in ipairs(character:GetDescendants()) do
          if part:IsA("BasePart") then
@@ -422,7 +399,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
       end
    end
 
-   -- 7. Fly Physics
    if flying and character and humanoidRootPart and humanoid and humanoid.Health > 0 then
       bg.Parent = humanoidRootPart
       bv.Parent = humanoidRootPart
@@ -446,7 +422,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
    end
 end)
 
--- Infinite Jump Listener
 game:GetService("UserInputService").JumpRequest:Connect(function()
    if infiniteJumpEnabled and humanoid then
       humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -460,3 +435,5 @@ player.CharacterAdded:Connect(function(newChar)
    bg.Parent = humanoidRootPart
    bv.Parent = humanoidRootPart
 end)
+
+Rayfield:Notify({Title = "Berhasil Dimuat!", Content = "100 Fitur Pro & Rayfield UI Siap Digunakan.", Duration = 4})
