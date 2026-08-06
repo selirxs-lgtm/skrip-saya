@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Roblox Pro Menu | Rayfield Dropdown Edition",
+   Name = "Roblox Pro Menu | Ultimate Troll Edition",
    LoadingTitle = "Memuat Script...",
    LoadingSubtitle = "by AI Collaborator",
    ConfigurationSaving = { Enabled = false },
@@ -18,7 +18,7 @@ local flying = false
 local speed = 50
 local heightOffset = 0
 local selectedTargetName = ""
-local isStunned = false
+local isSlowNoJump = false -- Fitur pengganti Stone
 local rifleLevel = 0
 
 -- Tab Utama
@@ -58,10 +58,9 @@ MainTab:CreateSlider({
 })
 
 --------------------------------------------------
--- TAB 2: TELEPORT & RIFLE TROLL (DROPDOWN SELECT)
+-- TAB 2: TELEPORT, SLOW & RIFLE TROLL
 --------------------------------------------------
 
--- Fungsi mengambil list nama player selain diri sendiri
 local function getPlayerList()
    local list = {}
    for _, p in ipairs(game.Players:GetPlayers()) do
@@ -75,7 +74,6 @@ local function getPlayerList()
    return list
 end
 
--- Membuat Dropdown Player
 local PlayerDropdown = TrollTab:CreateDropdown({
    Name = "Pilih Target Player",
    Options = getPlayerList(),
@@ -90,7 +88,6 @@ local PlayerDropdown = TrollTab:CreateDropdown({
    end,
 })
 
--- Tombol Refresh untuk memperbarui daftar player di dropdown jika ada yang join/leave
 TrollTab:CreateButton({
    Name = "🔄 Refresh List Player",
    Callback = function()
@@ -130,18 +127,20 @@ TrollTab:CreateButton({
    end,
 })
 
+-- FITUR BARU PENGGANTI STONE: SLOW & NO JUMP
 TrollTab:CreateToggle({
-   Name = "Troll: Stun Target (Tidak Bisa Gerak)",
+   Name = "Troll: Slow & No Jump (Jalan Siput & Gak Bisa Loncat)",
    CurrentValue = false,
    Callback = function(Value)
-      isStunned = Value
-      if not isStunned then
+      isSlowNoJump = Value
+      if not isSlowNoJump then
          local target = getTargetPlayer()
          if target and target.Character then
             local tHum = target.Character:FindFirstChildOfClass("Humanoid")
             if tHum then
                tHum.WalkSpeed = 16
                tHum.JumpPower = 50
+               tHum.JumpHeight = 7.2
             end
          end
       end
@@ -191,7 +190,7 @@ ChaosTab:CreateButton({
 })
 
 --------------------------------------------------
--- SISTEM FISIKA (FLY, STUN, & RIFLE TROLL LOOP)
+-- SISTEM FISIKA (FLY, SLOW/NO JUMP, & RIFLE TROLL LOOP)
 --------------------------------------------------
 local bg = Instance.new("BodyGyro")
 bg.P = 9e4
@@ -207,19 +206,20 @@ local camera = workspace.CurrentCamera
 local tickCounter = 0
 
 game:GetService("RunService").RenderStepped:Connect(function()
-   -- Logika Stun Target
-   if isStunned and selectedTargetName ~= "" then
+   -- Logika Slow & No Jump Target (Pengganti Stone)
+   if isSlowNoJump and selectedTargetName ~= "" then
       local target = getTargetPlayer()
       if target and target.Character then
          local tHum = target.Character:FindFirstChildOfClass("Humanoid")
          if tHum then
-            tHum.WalkSpeed = 0
-            tHum.JumpPower = 0
+            tHum.WalkSpeed = 4 -- Jalan sangat lambat (seperti siput)
+            tHum.JumpPower = 0 -- Tidak bisa loncat sama sekali
+            tHum.JumpHeight = 0
          end
       end
    end
 
-   -- Logika Rifle Jumpscare (Menempel di depan muka target menghadap langsung)
+   -- Logika Rifle Jumpscare
    if rifleLevel > 0 and selectedTargetName ~= "" then
       local target = getTargetPlayer()
       if target and target.Character and target.Character:FindFirstChild("Head") then
