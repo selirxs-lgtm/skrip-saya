@@ -19,7 +19,7 @@ local humanoid = character:WaitForChild("Humanoid")
 local flying = false
 local speed = 50
 local heightOffset = 0
-local targetPlayerName = ""
+local selectedTargetName = ""
 local isStunned = false
 
 -- Tab Utama
@@ -61,28 +61,51 @@ MainTab:CreateSlider({
 })
 
 --------------------------------------------------
--- TAB 2: TELEPORT & TROLL
+-- TAB 2: TELEPORT & TROLL (DENGAN DROPDOWN)
 --------------------------------------------------
-TrollTab:CreateInput({
-   Name = "Nama Target Player",
-   PlaceholderText = "Ketik sebagian nama player...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      targetPlayerName = string.lower(Text)
+
+-- Fungsi Mengambil Daftar Nama Player (Kecuali Diri Sendiri)
+local function getPlayerList()
+   local list = {}
+   for _, p in ipairs(game.Players:GetPlayers()) do
+      if p ~= player then
+         table.insert(list, p.Name)
+      end
+   end
+   if #list == 0 then
+      table.insert(list, "Tidak ada player lain")
+   end
+   return list
+end
+
+local PlayerDropdown = TrollTab:CreateDropdown({
+   Name = "Pilih Target Player",
+   Options = getPlayerList(),
+   CurrentOption = "",
+   Flag = "PlayerDropdown",
+   Callback = function(Option)
+      -- Rayfield Dropdown callback bisa berupa string atau tabel string tergantung versi, kita amankan:
+      if type(Option) == "table" then
+         selectedTargetName = Option[1] or ""
+      else
+         selectedTargetName = tostring(Option)
+      end
    end,
 })
 
--- Fungsi Mencari Player Berdasarkan Input
+-- Tombol untuk Refresh / Perbarui Daftar Player di Dropdown
+TrollTab:CreateButton({
+   Name = "🔄 Refresh Daftar Player",
+   Callback = function()
+      PlayerDropdown:Refresh(getPlayerList())
+      Rayfield:Notify({Title = "Refresh", Content = "Daftar player diperbarui!", Duration = 2})
+   end,
+})
+
+-- Fungsi Mendapatkan Objek Player dari Nama yang Dipilih
 local function getTargetPlayer()
-   if targetPlayerName == "" then return nil end
-   for _, p in ipairs(game.Players:GetPlayers()) do
-      if p ~= player then
-         if string.find(string.lower(p.Name), targetPlayerName) or string.find(string.lower(p.DisplayName), targetPlayerName) then
-            return p
-         end
-      end
-   end
-   return nil
+   if selectedTargetName == "" or selectedTargetName == "Tidak ada player lain" then return nil end
+   return game.Players:FindFirstChild(selectedTargetName)
 end
 
 TrollTab:CreateButton({
@@ -93,7 +116,7 @@ TrollTab:CreateButton({
          humanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
          Rayfield:Notify({Title = "Berhasil", Content = "Teleport ke " .. target.Name, Duration = 2})
       else
-         Rayfield:Notify({Title = "Gagal", Content = "Player tidak ditemukan!", Duration = 2})
+         Rayfield:Notify({Title = "Gagal", Content = "Pilih target player yang valid dulu!", Duration = 2})
       end
    end,
 })
@@ -106,7 +129,7 @@ TrollTab:CreateButton({
          target.Character.HumanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 3, 0)
          Rayfield:Notify({Title = "Berhasil", Content = "Menarik " .. target.Name, Duration = 2})
       else
-         Rayfield:Notify({Title = "Gagal", Content = "Player tidak ditemukan!", Duration = 2})
+         Rayfield:Notify({Title = "Gagal", Content = "Pilih target player yang valid dulu!", Duration = 2})
       end
    end,
 })
