@@ -1,12 +1,10 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Roblox Pro Menu | Rayfield Edition",
+   Name = "Roblox Pro Menu | Rayfield Dropdown Edition",
    LoadingTitle = "Memuat Script...",
    LoadingSubtitle = "by AI Collaborator",
-   ConfigurationSaving = {
-      Enabled = false,
-   },
+   ConfigurationSaving = { Enabled = false },
    KeySystem = false,
 })
 
@@ -21,7 +19,7 @@ local speed = 50
 local heightOffset = 0
 local selectedTargetName = ""
 local isStunned = false
-local rifleLevel = 0 -- 0: OFF, 1: Mild, 2: Fast, 3: Brutal Spam
+local rifleLevel = 0
 
 -- Tab Utama
 local MainTab = Window:CreateTab("Fly & Movement", 4483362458)
@@ -34,7 +32,6 @@ local ChaosTab = Window:CreateTab("Chaos / World", 4483362458)
 MainTab:CreateToggle({
    Name = "Aktifkan Fly",
    CurrentValue = false,
-   Flag = "FlyToggle",
    Callback = function(Value)
       flying = Value
    end,
@@ -45,7 +42,6 @@ MainTab:CreateSlider({
    Range = {10, 300},
    Increment = 5,
    CurrentValue = 50,
-   Flag = "SpeedSlider",
    Callback = function(Value)
       speed = Value
    end,
@@ -56,34 +52,56 @@ MainTab:CreateSlider({
    Range = {-50, 50},
    Increment = 1,
    CurrentValue = 0,
-   Flag = "HeightSlider",
    Callback = function(Value)
       heightOffset = Value
    end,
 })
 
 --------------------------------------------------
--- TAB 2: TELEPORT & RIFLE TROLL
+-- TAB 2: TELEPORT & RIFLE TROLL (DROPDOWN SELECT)
 --------------------------------------------------
-TrollTab:CreateInput({
-   Name = "Nama Target Player",
-   PlaceholderText = "Ketik sebagian nama player...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      selectedTargetName = string.lower(Text)
+
+-- Fungsi mengambil list nama player selain diri sendiri
+local function getPlayerList()
+   local list = {}
+   for _, p in ipairs(game.Players:GetPlayers()) do
+      if p ~= player then
+         table.insert(list, p.Name)
+      end
+   end
+   if #list == 0 then
+      table.insert(list, "Tidak ada player lain")
+   end
+   return list
+end
+
+-- Membuat Dropdown Player
+local PlayerDropdown = TrollTab:CreateDropdown({
+   Name = "Pilih Target Player",
+   Options = getPlayerList(),
+   CurrentOption = "",
+   Flag = "PlayerDropdownFlag",
+   Callback = function(Option)
+      if type(Option) == "table" then
+         selectedTargetName = Option[1] or ""
+      else
+         selectedTargetName = Option or ""
+      end
+   end,
+})
+
+-- Tombol Refresh untuk memperbarui daftar player di dropdown jika ada yang join/leave
+TrollTab:CreateButton({
+   Name = "🔄 Refresh List Player",
+   Callback = function()
+      PlayerDropdown:Refresh(getPlayerList(), true)
+      Rayfield:Notify({Title = "Success", Content = "Daftar player diperbarui!", Duration = 2})
    end,
 })
 
 local function getTargetPlayer()
-   if selectedTargetName == "" then return nil end
-   for _, p in ipairs(game.Players:GetPlayers()) do
-      if p ~= player then
-         if string.find(string.lower(p.Name), selectedTargetName) or string.find(string.lower(p.DisplayName), selectedTargetName) then
-            return p
-         end
-      end
-   end
-   return nil
+   if selectedTargetName == "" or selectedTargetName == "Tidak ada player lain" then return nil end
+   return game.Players:FindFirstChild(selectedTargetName)
 end
 
 TrollTab:CreateButton({
@@ -94,7 +112,7 @@ TrollTab:CreateButton({
          humanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
          Rayfield:Notify({Title = "Berhasil", Content = "Teleport ke " .. target.Name, Duration = 2})
       else
-         Rayfield:Notify({Title = "Gagal", Content = "Player tidak ditemukan!", Duration = 2})
+         Rayfield:Notify({Title = "Gagal", Content = "Pilih target dengan benar di dropdown!", Duration = 2})
       end
    end,
 })
@@ -107,7 +125,7 @@ TrollTab:CreateButton({
          target.Character.HumanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 3, 0)
          Rayfield:Notify({Title = "Berhasil", Content = "Menarik " .. target.Name, Duration = 2})
       else
-         Rayfield:Notify({Title = "Gagal", Content = "Player tidak ditemukan!", Duration = 2})
+         Rayfield:Notify({Title = "Gagal", Content = "Pilih target dengan benar di dropdown!", Duration = 2})
       end
    end,
 })
