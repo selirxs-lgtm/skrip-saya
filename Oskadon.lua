@@ -1,48 +1,43 @@
 --[[
-    SPEED MENU ULTRA V4.1 (Fixed)
-    - Menu pasti muncul
-    - Error handling lebih baik
-    - Support hampir semua executor
+    SPEED MENU ULTRA V5 - Rayfield Edition
+    Lebih stabil, jarang error, UI modern
 ]]
 
 local success, err = pcall(function()
+    -- Load Rayfield
+    local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
     local Players = game:GetService("Players")
     local UserInputService = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
-    local StarterGui = game:GetService("StarterGui")
-
     local player = Players.LocalPlayer
-    if not player then return end
 
-    -- Hapus GUI lama kalau ada
-    local old = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("SpeedMenuUltraV4")
-    if old then old:Destroy() end
-
-    -- ====================== CONFIG ======================
-    local DEFAULT_SPEED   = 16
-    local DEFAULT_JUMP    = 50
-    local DEFAULT_FLY     = 60
+    -- ====================== SETTINGS ======================
+    local DEFAULT_SPEED = 16
+    local DEFAULT_JUMP = 50
+    local DEFAULT_FLY = 60
     local DEFAULT_GRAVITY = 196.2
-    local DEFAULT_HIP     = 2
+    local DEFAULT_HIP = 2
 
-    local MIN_SPEED, MAX_SPEED     = 16, 1500
-    local MIN_JUMP, MAX_JUMP       = 50, 600
-    local MIN_FLY, MAX_FLY         = 10, 600
-    local MIN_GRAVITY, MAX_GRAVITY = 0, 500
-    local MIN_HIP, MAX_HIP         = 0, 10
-    local SPRINT_MULTIPLIER = 1.75
+    local speed = DEFAULT_SPEED
+    local jumpPower = DEFAULT_JUMP
+    local flySpeed = DEFAULT_FLY
+    local gravity = DEFAULT_GRAVITY
+    local hipHeight = DEFAULT_HIP
 
-    local speed, jumpPower, flySpeed = DEFAULT_SPEED, DEFAULT_JUMP, DEFAULT_FLY
-    local gravity, hipHeight = DEFAULT_GRAVITY, DEFAULT_HIP
-    local speedEnabled, jumpEnabled = true, true
-    local infiniteJump, flying, noclip, sprinting, forceApply = false, false, false, false, true
+    local speedEnabled = true
+    local jumpEnabled = true
+    local infiniteJump = false
+    local flying = false
+    local noclip = false
+    local sprinting = false
+    local forceApply = true
 
     local character, humanoid, root
     local connections = {}
     local flyVelocity, flyOrientation, flyAttachment
-    local customPresets = {}
-    local savedConfig = nil
 
+    -- ====================== FUNCTIONS ======================
     local function disconnect(name)
         if connections[name] then
             connections[name]:Disconnect()
@@ -62,7 +57,7 @@ local success, err = pcall(function()
     local function targetSpeed()
         if not speedEnabled then return DEFAULT_SPEED end
         if sprinting then
-            return math.clamp(speed * SPRINT_MULTIPLIER, MIN_SPEED, MAX_SPEED)
+            return math.clamp(speed * 1.75, 16, 1500)
         end
         return speed
     end
@@ -90,40 +85,37 @@ local success, err = pcall(function()
         end
     end
 
-    local function updateNoclip()
-        if not character then return end
-        for _, obj in ipairs(character:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                obj.CanCollide = not noclip
-            end
-        end
-    end
-
     local function setNoclip(state)
         noclip = state
         disconnect("noclip")
         if noclip then
-            updateNoclip()
             connections.noclip = RunService.Stepped:Connect(function()
                 if character then
-                    for _, obj in ipairs(character:GetDescendants()) do
-                        if obj:IsA("BasePart") then
-                            obj.CanCollide = false
+                    for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
                         end
                     end
                 end
             end)
         else
-            updateNoclip()
+            if character then
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
         end
     end
 
     local function stopFly()
         flying = false
         disconnect("fly")
-        if flyVelocity then pcall(function() flyVelocity:Destroy() end) flyVelocity = nil end
-        if flyOrientation then pcall(function() flyOrientation:Destroy() end) flyOrientation = nil end
-        if flyAttachment then pcall(function() flyAttachment:Destroy() end) flyAttachment = nil end
+        if flyVelocity then pcall(function() flyVelocity:Destroy() end) end
+        if flyOrientation then pcall(function() flyOrientation:Destroy() end) end
+        if flyAttachment then pcall(function() flyAttachment:Destroy() end) end
+        flyVelocity, flyOrientation, flyAttachment = nil, nil, nil
         if humanoid then humanoid.PlatformStand = false end
     end
 
@@ -134,7 +126,6 @@ local success, err = pcall(function()
         humanoid.PlatformStand = true
 
         flyAttachment = Instance.new("Attachment")
-        flyAttachment.Name = "UltraFlyAtt"
         flyAttachment.Parent = root
 
         flyVelocity = Instance.new("LinearVelocity")
@@ -178,7 +169,7 @@ local success, err = pcall(function()
     end
 
     -- Infinite Jump
-    connections.jumpRequest = UserInputService.JumpRequest:Connect(function()
+    connections.jump = UserInputService.JumpRequest:Connect(function()
         if infiniteJump and jumpEnabled and humanoid then
             humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
@@ -196,7 +187,7 @@ local success, err = pcall(function()
         end
     end)
 
-    -- Character
+    -- Character Handling
     player.CharacterAdded:Connect(function(char)
         stopFly()
         task.wait(0.3)
@@ -205,8 +196,8 @@ local success, err = pcall(function()
         applyJump()
         applyHip()
         if noclip then
-            task.wait(0.15)
-            updateNoclip()
+            task.wait(0.1)
+            setNoclip(true)
         end
     end)
 
@@ -214,547 +205,211 @@ local success, err = pcall(function()
         refreshCharacter(player.Character)
     end
 
-    -- ====================== GUI ======================
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "SpeedMenuUltraV4"
-    gui.ResetOnSpawn = false
-    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    gui.IgnoreGuiInset = true
-    gui.Parent = player:WaitForChild("PlayerGui")
+    -- ====================== RAYFIELD UI ======================
+    local Window = Rayfield:CreateWindow({
+        Name = "⚡ Speed Menu Ultra V5",
+        LoadingTitle = "Speed Menu Ultra",
+        LoadingSubtitle = "by Grok",
+        ConfigurationSaving = {
+            Enabled = true,
+            FolderName = "SpeedMenuUltra",
+            FileName = "Config"
+        },
+        KeySystem = false
+    })
 
-    local main = Instance.new("Frame")
-    main.Name = "Main"
-    main.Size = UDim2.fromOffset(380, 620)
-    main.Position = UDim2.new(0.5, -190, 0.5, -310)
-    main.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
-    main.BorderSizePixel = 0
-    main.Active = true
-    main.Visible = true
-    main.Parent = gui
-    Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
+    -- Tab Speed
+    local SpeedTab = Window:CreateTab("Speed", 4483362458)
 
-    local stroke = Instance.new("UIStroke", main)
-    stroke.Color = Color3.fromRGB(70, 70, 110)
-    stroke.Thickness = 2
+    SpeedTab:CreateSection("Walk Speed")
 
-    -- Title Bar
-    local titleBar = Instance.new("Frame")
-    titleBar.Size = UDim2.new(1, 0, 0, 50)
-    titleBar.BackgroundColor3 = Color3.fromRGB(26, 26, 38)
-    titleBar.BorderSizePixel = 0
-    titleBar.Active = true
-    titleBar.Parent = main
-    Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 16)
-
-    local titleFix = Instance.new("Frame")
-    titleFix.Size = UDim2.new(1, 0, 0, 18)
-    titleFix.Position = UDim2.new(0, 0, 1, -18)
-    titleFix.BackgroundColor3 = Color3.fromRGB(26, 26, 38)
-    titleFix.BorderSizePixel = 0
-    titleFix.Parent = titleBar
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -110, 1, 0)
-    title.Position = UDim2.fromOffset(16, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "⚡ SPEED MENU ULTRA V4.1"
-    title.TextColor3 = Color3.new(1, 1, 1)
-    title.TextSize = 17
-    title.Font = Enum.Font.GothamBold
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.Parent = titleBar
-
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.fromOffset(34, 34)
-    closeBtn.Position = UDim2.new(1, -42, 0, 8)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(190, 45, 45)
-    closeBtn.Text = "✕"
-    closeBtn.TextColor3 = Color3.new(1, 1, 1)
-    closeBtn.TextSize = 16
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.Parent = titleBar
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
-
-    local miniBtn = Instance.new("TextButton")
-    miniBtn.Size = UDim2.fromOffset(34, 34)
-    miniBtn.Position = UDim2.new(1, -82, 0, 8)
-    miniBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 75)
-    miniBtn.Text = "—"
-    miniBtn.TextColor3 = Color3.new(1, 1, 1)
-    miniBtn.TextSize = 18
-    miniBtn.Font = Enum.Font.GothamBold
-    miniBtn.Parent = titleBar
-    Instance.new("UICorner", miniBtn).CornerRadius = UDim.new(0, 8)
-
-    -- Dragging
-    local dragging, dragStart, startPos = false, nil, nil
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = main.Position
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-
-    -- Content
-    local content = Instance.new("ScrollingFrame")
-    content.Size = UDim2.new(1, -20, 1, -62)
-    content.Position = UDim2.fromOffset(10, 56)
-    content.BackgroundTransparency = 1
-    content.BorderSizePixel = 0
-    content.ScrollBarThickness = 5
-    content.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 160)
-    content.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    content.CanvasSize = UDim2.new(0, 0, 0, 0)
-    content.Parent = main
-
-    local list = Instance.new("UIListLayout", content)
-    list.Padding = UDim.new(0, 9)
-    list.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local pad = Instance.new("UIPadding", content)
-    pad.PaddingBottom = UDim.new(0, 18)
-    pad.PaddingTop = UDim.new(0, 6)
-
-    -- Helpers
-    local function section(text)
-        local l = Instance.new("TextLabel")
-        l.Size = UDim2.new(1, 0, 0, 22)
-        l.BackgroundTransparency = 1
-        l.Text = text
-        l.TextColor3 = Color3.fromRGB(150, 150, 200)
-        l.TextSize = 13
-        l.Font = Enum.Font.GothamBold
-        l.TextXAlignment = Enum.TextXAlignment.Left
-        l.Parent = content
-        return l
-    end
-
-    local function button(text, color)
-        local b = Instance.new("TextButton")
-        b.Size = UDim2.new(1, 0, 0, 38)
-        b.BackgroundColor3 = color
-        b.Text = text
-        b.TextColor3 = Color3.new(1, 1, 1)
-        b.TextSize = 14
-        b.Font = Enum.Font.GothamBold
-        b.AutoButtonColor = true
-        b.Parent = content
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 9)
-        return b
-    end
-
-    local function inputBox(placeholder, default)
-        local b = Instance.new("TextBox")
-        b.Size = UDim2.new(1, 0, 0, 38)
-        b.BackgroundColor3 = Color3.fromRGB(30, 30, 44)
-        b.TextColor3 = Color3.new(1, 1, 1)
-        b.PlaceholderColor3 = Color3.fromRGB(130, 130, 155)
-        b.PlaceholderText = placeholder
-        b.Text = tostring(default)
-        b.TextSize = 15
-        b.Font = Enum.Font.Gotham
-        b.ClearTextOnFocus = false
-        b.Parent = content
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 9)
-        return b
-    end
-
-    local function statusButton(offText, onText)
-        local b = button(offText, Color3.fromRGB(55, 55, 80))
-        local function setState(state)
-            b.Text = state and onText or offText
-            b.BackgroundColor3 = state and Color3.fromRGB(35, 165, 70) or Color3.fromRGB(55, 55, 80)
-        end
-        return b, setState
-    end
-
-    local function createSlider(min, max, current, onChanged)
-        local slider = Instance.new("TextButton")
-        slider.Size = UDim2.new(1, 0, 0, 26)
-        slider.BackgroundColor3 = Color3.fromRGB(30, 30, 44)
-        slider.Text = ""
-        slider.AutoButtonColor = false
-        slider.Parent = content
-        Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 8)
-
-        local fill = Instance.new("Frame")
-        fill.BackgroundColor3 = Color3.fromRGB(55, 130, 255)
-        fill.BorderSizePixel = 0
-        fill.Size = UDim2.new(math.clamp((current - min) / (max - min), 0, 1), 0, 1, 0)
-        fill.Parent = slider
-        Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 8)
-
-        local function update(val)
-            val = math.clamp(math.floor(val), min, max)
-            fill.Size = UDim2.new((val - min) / (max - min), 0, 1, 0)
-            onChanged(val)
-        end
-
-        local draggingSlider = false
-        local function calc(input)
-            local ratio = math.clamp((input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1)
-            update(min + ratio * (max - min))
-        end
-
-        slider.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                draggingSlider = true
-                calc(input)
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(input)
-            if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                calc(input)
-            end
-        end)
-        UserInputService.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                draggingSlider = false
-            end
-        end)
-
-        return update
-    end
-
-    -- ====================== SECTIONS ======================
-    section("WALK SPEED")
-    local speedInput = inputBox("Speed (16 - 1500)", speed)
-    speedInput.FocusLost:Connect(function()
-        local n = tonumber(speedInput.Text)
-        if n then
-            speed = math.clamp(math.floor(n), MIN_SPEED, MAX_SPEED)
-            speedInput.Text = tostring(speed)
+    SpeedTab:CreateSlider({
+        Name = "Walk Speed",
+        Range = {16, 1500},
+        Increment = 1,
+        CurrentValue = 16,
+        Flag = "WalkSpeed",
+        Callback = function(Value)
+            speed = Value
             applySpeed()
-        else
-            speedInput.Text = tostring(speed)
-        end
-    end)
+        end,
+    })
 
-    local updateSpeedSlider = createSlider(MIN_SPEED, MAX_SPEED, speed, function(val)
-        speed = val
-        speedInput.Text = tostring(speed)
-        applySpeed()
-    end)
+    SpeedTab:CreateToggle({
+        Name = "Enable Speed",
+        CurrentValue = true,
+        Flag = "SpeedEnabled",
+        Callback = function(Value)
+            speedEnabled = Value
+            applySpeed()
+        end,
+    })
 
-    local speedToggle, setSpeedToggle = statusButton("● SPEED: OFF", "● SPEED: ON")
-    setSpeedToggle(true)
-    speedToggle.MouseButton1Click:Connect(function()
-        speedEnabled = not speedEnabled
-        setSpeedToggle(speedEnabled)
-        applySpeed()
-    end)
+    SpeedTab:CreateToggle({
+        Name = "Sprint (x1.75)",
+        CurrentValue = false,
+        Flag = "Sprint",
+        Callback = function(Value)
+            sprinting = Value
+            applySpeed()
+        end,
+    })
 
-    section("JUMP")
-    local jumpInput = inputBox("Jump Power (50 - 600)", jumpPower)
-    jumpInput.FocusLost:Connect(function()
-        local n = tonumber(jumpInput.Text)
-        if n then
-            jumpPower = math.clamp(math.floor(n), MIN_JUMP, MAX_JUMP)
-            jumpInput.Text = tostring(jumpPower)
+    SpeedTab:CreateToggle({
+        Name = "Force Apply (Anti Reset)",
+        CurrentValue = true,
+        Flag = "ForceApply",
+        Callback = function(Value)
+            forceApply = Value
+        end,
+    })
+
+    -- Tab Jump
+    local JumpTab = Window:CreateTab("Jump", 4483362458)
+
+    JumpTab:CreateSection("Jump Settings")
+
+    JumpTab:CreateSlider({
+        Name = "Jump Power",
+        Range = {50, 600},
+        Increment = 1,
+        CurrentValue = 50,
+        Flag = "JumpPower",
+        Callback = function(Value)
+            jumpPower = Value
             applyJump()
-        else
-            jumpInput.Text = tostring(jumpPower)
-        end
-    end)
+        end,
+    })
 
-    local updateJumpSlider = createSlider(MIN_JUMP, MAX_JUMP, jumpPower, function(val)
-        jumpPower = val
-        jumpInput.Text = tostring(jumpPower)
-        applyJump()
-    end)
+    JumpTab:CreateToggle({
+        Name = "Enable Jump",
+        CurrentValue = true,
+        Flag = "JumpEnabled",
+        Callback = function(Value)
+            jumpEnabled = Value
+            applyJump()
+        end,
+    })
 
-    local jumpToggle, setJumpToggle = statusButton("Jump: OFF", "Jump: ON")
-    setJumpToggle(true)
-    jumpToggle.MouseButton1Click:Connect(function()
-        jumpEnabled = not jumpEnabled
-        setJumpToggle(jumpEnabled)
-        applyJump()
-    end)
+    JumpTab:CreateToggle({
+        Name = "Infinite Jump",
+        CurrentValue = false,
+        Flag = "InfJump",
+        Callback = function(Value)
+            infiniteJump = Value
+        end,
+    })
 
-    local infBtn, setInf = statusButton("Infinite Jump: OFF", "Infinite Jump: ON")
-    infBtn.MouseButton1Click:Connect(function()
-        infiniteJump = not infiniteJump
-        setInf(infiniteJump)
-    end)
+    -- Tab Fly
+    local FlyTab = Window:CreateTab("Fly & Noclip", 4483362458)
 
-    section("FLY")
-    local flyInput = inputBox("Fly Speed (10 - 600)", flySpeed)
-    flyInput.FocusLost:Connect(function()
-        local n = tonumber(flyInput.Text)
-        if n then
-            flySpeed = math.clamp(math.floor(n), MIN_FLY, MAX_FLY)
-            flyInput.Text = tostring(flySpeed)
-        else
-            flyInput.Text = tostring(flySpeed)
-        end
-    end)
+    FlyTab:CreateSection("Fly")
 
-    local updateFlySlider = createSlider(MIN_FLY, MAX_FLY, flySpeed, function(val)
-        flySpeed = val
-        flyInput.Text = tostring(flySpeed)
-    end)
+    FlyTab:CreateSlider({
+        Name = "Fly Speed",
+        Range = {10, 600},
+        Increment = 1,
+        CurrentValue = 60,
+        Flag = "FlySpeed",
+        Callback = function(Value)
+            flySpeed = Value
+        end,
+    })
 
-    local flyBtn, setFly = statusButton("Fly: OFF", "Fly: ON")
-    flyBtn.MouseButton1Click:Connect(function()
-        if flying then
-            stopFly()
-            setFly(false)
-        else
-            setFly(startFly())
-        end
-    end)
-
-    section("MOVEMENT")
-    local sprintBtn, setSprint = statusButton("Sprint: OFF", "Sprint: ON")
-    sprintBtn.MouseButton1Click:Connect(function()
-        sprinting = not sprinting
-        setSprint(sprinting)
-        applySpeed()
-    end)
-
-    local noclipBtn, setNoclipBtn = statusButton("Noclip: OFF", "Noclip: ON")
-    noclipBtn.MouseButton1Click:Connect(function()
-        setNoclip(not noclip)
-        setNoclipBtn(noclip)
-    end)
-
-    local forceBtn, setForce = statusButton("Force Apply: OFF", "Force Apply: ON")
-    setForce(true)
-    forceBtn.MouseButton1Click:Connect(function()
-        forceApply = not forceApply
-        setForce(forceApply)
-    end)
-
-    section("EXTRA")
-    local gravInput = inputBox("Gravity (0 - 500)", gravity)
-    gravInput.FocusLost:Connect(function()
-        local n = tonumber(gravInput.Text)
-        if n then
-            gravity = math.clamp(n, MIN_GRAVITY, MAX_GRAVITY)
-            gravInput.Text = tostring(gravity)
-            applyGravity()
-        else
-            gravInput.Text = tostring(gravity)
-        end
-    end)
-
-    local hipInput = inputBox("Hip Height (0 - 10)", hipHeight)
-    hipInput.FocusLost:Connect(function()
-        local n = tonumber(hipInput.Text)
-        if n then
-            hipHeight = math.clamp(n, MIN_HIP, MAX_HIP)
-            hipInput.Text = tostring(hipHeight)
-            applyHip()
-        else
-            hipInput.Text = tostring(hipHeight)
-        end
-    end)
-
-    section("CUSTOM PRESETS (5 SLOT)")
-    for i = 1, 5 do
-        local b = button("Preset " .. i .. " — Empty", Color3.fromRGB(40, 85, 170))
-        b.MouseButton1Click:Connect(function()
-            if customPresets[i] then
-                local p = customPresets[i]
-                speed = p.speed
-                jumpPower = p.jump
-                flySpeed = p.fly
-                gravity = p.grav or DEFAULT_GRAVITY
-                hipHeight = p.hip or DEFAULT_HIP
-
-                speedInput.Text = tostring(speed)
-                jumpInput.Text = tostring(jumpPower)
-                flyInput.Text = tostring(flySpeed)
-                gravInput.Text = tostring(gravity)
-                hipInput.Text = tostring(hipHeight)
-
-                updateSpeedSlider(speed)
-                updateJumpSlider(jumpPower)
-                updateFlySlider(flySpeed)
-
-                applySpeed()
-                applyJump()
-                applyGravity()
-                applyHip()
-
-                b.Text = "Preset " .. i .. " — Loaded"
-                task.delay(1.1, function()
-                    if b and b.Parent then b.Text = "Preset " .. i .. " — Save" end
-                end)
+    FlyTab:CreateToggle({
+        Name = "Fly",
+        CurrentValue = false,
+        Flag = "Fly",
+        Callback = function(Value)
+            if Value then
+                startFly()
             else
-                customPresets[i] = {
-                    speed = speed,
-                    jump = jumpPower,
-                    fly = flySpeed,
-                    grav = gravity,
-                    hip = hipHeight
-                }
-                b.Text = "Preset " .. i .. " — Saved"
-                task.delay(1.1, function()
-                    if b and b.Parent then b.Text = "Preset " .. i .. " — Save" end
-                end)
+                stopFly()
             end
-        end)
-    end
+        end,
+    })
 
-    section("CONFIG")
-    local saveBtn = button("💾 SAVE CONFIG", Color3.fromRGB(40, 115, 165))
-    saveBtn.MouseButton1Click:Connect(function()
-        savedConfig = {
-            speed = speed, jump = jumpPower, fly = flySpeed,
-            gravity = gravity, hip = hipHeight,
-            speedEnabled = speedEnabled, jumpEnabled = jumpEnabled,
-            infiniteJump = infiniteJump, forceApply = forceApply
-        }
-        saveBtn.Text = "✓ CONFIG SAVED"
-        task.delay(1.2, function()
-            if saveBtn and saveBtn.Parent then saveBtn.Text = "💾 SAVE CONFIG" end
-        end)
-    end)
+    FlyTab:CreateSection("Noclip")
 
-    local loadBtn = button("↥ LOAD CONFIG", Color3.fromRGB(40, 115, 165))
-    loadBtn.MouseButton1Click:Connect(function()
-        if not savedConfig then
-            loadBtn.Text = "No saved config"
-            task.delay(1.2, function()
-                if loadBtn and loadBtn.Parent then loadBtn.Text = "↥ LOAD CONFIG" end
-            end)
-            return
-        end
-        local c = savedConfig
-        speed = c.speed
-        jumpPower = c.jump
-        flySpeed = c.fly
-        gravity = c.gravity or DEFAULT_GRAVITY
-        hipHeight = c.hip or DEFAULT_HIP
-        speedEnabled = c.speedEnabled
-        jumpEnabled = c.jumpEnabled
-        infiniteJump = c.infiniteJump
-        forceApply = c.forceApply
+    FlyTab:CreateToggle({
+        Name = "Noclip",
+        CurrentValue = false,
+        Flag = "Noclip",
+        Callback = function(Value)
+            setNoclip(Value)
+        end,
+    })
 
-        speedInput.Text = tostring(speed)
-        jumpInput.Text = tostring(jumpPower)
-        flyInput.Text = tostring(flySpeed)
-        gravInput.Text = tostring(gravity)
-        hipInput.Text = tostring(hipHeight)
+    -- Tab Extra
+    local ExtraTab = Window:CreateTab("Extra", 4483362458)
 
-        updateSpeedSlider(speed)
-        updateJumpSlider(jumpPower)
-        updateFlySlider(flySpeed)
+    ExtraTab:CreateSection("World")
 
-        setSpeedToggle(speedEnabled)
-        setJumpToggle(jumpEnabled)
-        setInf(infiniteJump)
-        setForce(forceApply)
+    ExtraTab:CreateSlider({
+        Name = "Gravity",
+        Range = {0, 500},
+        Increment = 1,
+        CurrentValue = 196,
+        Flag = "Gravity",
+        Callback = function(Value)
+            gravity = Value
+            applyGravity()
+        end,
+    })
 
-        applySpeed()
-        applyJump()
-        applyGravity()
-        applyHip()
+    ExtraTab:CreateSlider({
+        Name = "Hip Height",
+        Range = {0, 10},
+        Increment = 0.1,
+        CurrentValue = 2,
+        Flag = "HipHeight",
+        Callback = function(Value)
+            hipHeight = Value
+            applyHip()
+        end,
+    })
 
-        loadBtn.Text = "✓ CONFIG LOADED"
-        task.delay(1.2, function()
-            if loadBtn and loadBtn.Parent then loadBtn.Text = "↥ LOAD CONFIG" end
-        end)
-    end)
+    ExtraTab:CreateSection("Utility")
 
-    local resetBtn = button("↻ RESET ALL", Color3.fromRGB(175, 70, 40))
-    resetBtn.MouseButton1Click:Connect(function()
-        speed = DEFAULT_SPEED
-        jumpPower = DEFAULT_JUMP
-        flySpeed = DEFAULT_FLY
-        gravity = DEFAULT_GRAVITY
-        hipHeight = DEFAULT_HIP
-        speedEnabled = true
-        jumpEnabled = true
-        infiniteJump = false
-        sprinting = false
-        forceApply = true
+    ExtraTab:CreateButton({
+        Name = "Reset All to Default",
+        Callback = function()
+            speed = DEFAULT_SPEED
+            jumpPower = DEFAULT_JUMP
+            flySpeed = DEFAULT_FLY
+            gravity = DEFAULT_GRAVITY
+            hipHeight = DEFAULT_HIP
+            speedEnabled = true
+            jumpEnabled = true
+            infiniteJump = false
+            sprinting = false
+            forceApply = true
+            stopFly()
+            setNoclip(false)
 
-        stopFly()
-        setNoclip(false)
+            applySpeed()
+            applyJump()
+            applyGravity()
+            applyHip()
 
-        speedInput.Text = tostring(speed)
-        jumpInput.Text = tostring(jumpPower)
-        flyInput.Text = tostring(flySpeed)
-        gravInput.Text = tostring(gravity)
-        hipInput.Text = tostring(hipHeight)
+            Rayfield:Notify({
+                Title = "Reset",
+                Content = "Semua setting dikembalikan ke default",
+                Duration = 3
+            })
+        end,
+    })
 
-        updateSpeedSlider(speed)
-        updateJumpSlider(jumpPower)
-        updateFlySlider(flySpeed)
+    -- Notify sukses
+    Rayfield:Notify({
+        Title = "Speed Menu Ultra V5",
+        Content = "Berhasil dimuat! Tekan RightControl untuk buka/tutup",
+        Duration = 6
+    })
 
-        setSpeedToggle(true)
-        setJumpToggle(true)
-        setInf(false)
-        setSprint(false)
-        setFly(false)
-        setNoclipBtn(false)
-        setForce(true)
-
-        applySpeed()
-        applyJump()
-        applyGravity()
-        applyHip()
-    end)
-
-    -- Minimize / Close
-    local minimized = false
-    miniBtn.MouseButton1Click:Connect(function()
-        minimized = not minimized
-        content.Visible = not minimized
-        main.Size = minimized and UDim2.fromOffset(380, 50) or UDim2.fromOffset(380, 620)
-        miniBtn.Text = minimized and "+" or "—"
-    end)
-
-    closeBtn.MouseButton1Click:Connect(function()
-        main.Visible = false
-    end)
-
-    -- Keybind
-    UserInputService.InputBegan:Connect(function(input, processed)
-        if processed then return end
-        if input.KeyCode == Enum.KeyCode.RightShift then
-            main.Visible = not main.Visible
-        end
-    end)
-
-    -- Initial apply
-    applySpeed()
-    applyJump()
-    applyGravity()
-    applyHip()
-
-    -- Notifikasi sukses
-    pcall(function()
-        StarterGui:SetCore("SendNotification", {
-            Title = "Speed Menu Ultra V4.1",
-            Text = "Berhasil dimuat! Tekan RightShift",
-            Duration = 5
-        })
-    end)
-
-    print("[Speed Menu Ultra V4.1] Loaded successfully!")
-    print("Tekan RightShift untuk buka/tutup menu")
+    print("[Speed Menu Ultra V5 - Rayfield] Loaded!")
 end)
 
 if not success then
-    warn("[Speed Menu] Error:", err)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Speed Menu Error",
-        Text = tostring(err),
-        Duration = 8
-    })
+    warn("Error loading Speed Menu:", err)
 end
